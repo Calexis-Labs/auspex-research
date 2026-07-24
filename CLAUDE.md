@@ -3,6 +3,14 @@
 > Bu dosya projenin kalıcı hafızasıdır. Her önemli karar/sonuç sonrası GÜNCELLE.
 > Kullanıcı teknik detaya boğulmak istemiyor — açıklamalar SADE Türkçe olmalı.
 
+## Depo (2026-07-24)
+Bu dizin artık git'te: **github.com/Calexis-Labs/auspex-research (PRIVATE)**,
+dal `main`. Eğitim verisi (`dataset_local/`, ~40 MB) ve v1 LoRA ağırlıkları
+(`train/adapters_mini/`) BİLEREK izleniyor — deponun asıl amacı bunları
+yedeklemek (T7 harici SSD'de duruyor, tek kopya kalmasın). `.env`, `traces/`,
+venv'ler ignore. Depo ÖZEL kalır; açık kaynak olan yalnız auspex-cli.
+Commit/push kuralı burada da geçerli: yalnız kullanıcı isteğiyle.
+
 ## Ne yapıyoruz (tek paragraf)
 
 Kapalı ağda (internetsiz), müşteri sahasında çalışacak, **salt-okunur** bir network

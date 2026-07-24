@@ -1,0 +1,30 @@
+# netagent v2 topolojisi (uretilmis dosya, elle duzenleme) — seed={{ spec.seed }}
+name: {{ spec.name }}
+
+mgmt:
+  network: {{ spec.mgmt_net }}
+  ipv4-subnet: {{ spec.mgmt_subnet }}
+
+topology:
+  nodes:
+{% for name, node in spec.ceos_nodes.items() %}
+    {{ name }}:
+      kind: arista_ceos
+      image: {{ ceos_image }}
+      mgmt-ipv4: {{ node.mgmt_ipv4 }}
+      startup-config: configs/{{ name }}.cfg
+      enforce-startup-config: true
+{% endfor %}
+{% for name, host in spec.hosts.items() %}
+    {{ name }}:
+      kind: linux
+      image: {{ host_image }}
+      exec:
+        - ip addr add {{ host.ip_cidr }} dev eth1
+        - ip route replace default via {{ host.gw }}
+{% endfor %}
+
+  links:
+{% for link in spec.links %}
+    - endpoints: ["{{ link.a[0] }}:eth{{ link.a[1] }}", "{{ link.b[0] }}:eth{{ link.b[1] }}"]
+{% endfor %}

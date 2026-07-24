@@ -1,0 +1,385 @@
+{
+  "_meta": {
+    "aciklama": "Sentetik veri üretimi için yapılandırılmış TR semptom bankası. Her semptom kullanıcı/ticket ağzından yazılmıştır; cihaz adı ve kök neden ASLA geçmez. Placeholder'lar pipeline tarafından o seed'in gerçek topoloji değerleriyle doldurulur.",
+    "surum": "v1",
+    "sinif_sayisi": 19,
+    "varyant_sayisi_her_sinif": 15,
+    "placeholder_sozlesmesi": {
+      "{site_a}": "birinci bina/lokasyon etiketi (ör. 'A binası'); leaf konumundan türetilir",
+      "{site_b}": "ikinci bina/lokasyon etiketi",
+      "{site_c}": "üçüncü bina/lokasyon etiketi (3 leaf'li dünyalarda; yoksa {site_b} ile doldurulabilir)",
+      "{host_ip}": "etkilenen kullanıcı makinesinin IP'si",
+      "{host2_ip}": "aynı segmentteki sağlam komşu makinenin IP'si",
+      "{server_ip}": "bir sunucu/loopback IP'si (genelde sağlam kalan referans)",
+      "{server2_ip}": "ikinci sunucu/loopback IP'si (genelde etkilenen)",
+      "{vlan_id}": "VLAN numarası",
+      "{vlan_name}": "VLAN adı (USERS/OFIS/SUNUCU vb.)",
+      "{subnet}": "kullanıcı subnet'i CIDR (ör. 10.10.0.0/24)",
+      "{gateway_ip}": "ilgili ağın varsayılan ağ geçidi IP'si",
+      "{app_name}": "bir uygulama/servis adı (renk katmak için)",
+      "{user_name}": "bir kullanıcı adı (helpdesk kaydı tarzı)"
+    },
+    "not": "Tüketici, '_' ile başlayan anahtarları atlamalı; arıza sınıfları yalnızca diğer üst seviye anahtarlardır."
+  },
+  "interface_admin_down": {
+    "symptoms": [
+      "Yetişin, {site_a}'da kimse sunuculara giremiyor! Bilgisayarlar açık, birbirimize dosya atabiliyoruz ama {server_ip} da {server2_ip} de tamamen ölü. Birazdan yönetim sunumu var, acil bakın.",
+      "{site_a} tarafından {server_ip} ve {server2_ip}'ye ping gitmiyor. Aynı kattaki makineler birbirini görüyor, yereldeki her şey normal; kopukluk sadece sunucu tarafına çıkışta. Dün akşam değişiklik yapılmadı deniyor ama sabah böyle bulduk.",
+      "Çağrı kaydı: {site_a} kullanıcıları veri merkezi sunucularına erişemiyor. Ofis içi paylaşımlar ve yazıcılar sorunsuz. Etkilenen: ~20 kullanıcı. Başlangıç 08:40.",
+      "Ekibin yarısı çalışamıyor; {app_name} açılmıyormuş, sunucuya bağlanamıyorlar. İnternet var mı bilmiyorum ama bu iş durdu. Ne zaman düzelir, bir öğrenin lütfen.",
+      "{server_ip}'deki paylaşıma sabahtan beri ulaşamıyorum. İlginç olan, yan masadaki arkadaşın dosyalarını açabiliyorum; sadece sunucu tarafı gitti. Dün çıkarken her şey normaldi.",
+      "{site_a}'daki tüm ekip aynı anda sunucu bağlantısını kaybetti. Bu sabah kahve makinesini yeni taktılar ama alakası yoktur herhalde. Kısacası yerel çalışıyor, merkeze gidiş yok.",
+      "{server_ip}'ye traceroute attığımda ilk atlamadan sonra takılıp kalıyor, cevap gelmiyor. Yerel ağ geçidine erişim var. {site_a} komple etkilenmiş görünüyor.",
+      "Sabah mesaiye geldiğimizde veri merkeziyle bağlantı yoktu. Kullanıcı makineleri birbirini görüyor ama sunuculara hiçbir şey gitmiyor. Dün gece elektrik bir an kesilmişti, ilgisi var mı bilmem.",
+      "{site_a} ofisi sunuculara çıkamıyor. Ping de uygulama da ölü, ama aynı ofisteki paylaşımlar açık. Tek etkilenen bu bina gibi görünüyor.",
+      "Acil! Muhasebe bütün gün fatura işleyemedi çünkü sunucuya bağlanamıyorlar. Ofis ağı çalışıyor gibi, birbirlerine ulaşıyorlar ama {server_ip}'ye kimse giremiyor.",
+      "Şöyle bir durum var: {site_a}'daki herkes yerelde sorunsuz, ama {server_ip} ile {server2_ip}'nin ikisi de aynı anda erişilmez oldu. İki sunucunun birden aynı dakikada çökmesi bize tuhaf geldi.",
+      "Ticket #4471: Kullanıcı {user_name} 'sunucuya bağlanamıyorum' diyor. Kontrol ettik; aynı segmentteki diğer kullanıcılar da sunuculara erişemiyor, kendi aralarında sorun yok. Bina geneli.",
+      "Dün akşamki bakımdan sonra {site_a} sunuculara ulaşamaz oldu. Yerel paylaşımlar açılıyor, yazıcı çalışıyor; sadece merkeze giden yol kapalı gibi.",
+      "Sunuculara erişemiyoruz, tüm departman etkilendi. Kablolu kablosuz fark etmiyor, {site_a}'daki herkes aynı durumda. İçeride birbirimizi görüyoruz ama dışarı çıkış yok.",
+      "Merhaba, biraz aciliz. {site_a} tarafındaki bilgisayarların hiçbiri {server_ip}'ye ping atamıyor. Yerel ağ tamamen normal, sadece o hat gitmiş gibi. Bir bakabilir misiniz?"
+    ]
+  },
+  "vlan_removed_from_trunk": {
+    "symptoms": [
+      "{site_b}'deki kullanıcılar hiçbir şeye erişemiyor — ne sunuculara ne {site_a}'daki makinelere. {site_a} tamamen normal çalışıyor. Kablolar takılı, ışıklar yanıyor ama ağ yok gibi.",
+      "{host_ip} dahil {site_b} tarafındaki herkes ağdan koptu. Linkler up, ama hiçbir yere ulaşamıyorlar; ağ geçidine bile gidemiyorlar sanırım. {site_a}'da sorun yok.",
+      "Çağrı kaydı: {site_b} lokasyonundaki {vlan_name} kullanıcıları komple ağ dışı; ağ geçidine ve diğer binadaki aynı ağ üyelerine erişim yok. Diğer binalar etkilenmemiş. Öğleden sonra başlamış.",
+      "{site_b} ofisi öğleden sonra bir anda koptu. Sunucu yok, {site_a}'ya erişim yok, ağ geçidi cevap vermiyor. {site_a} çalışıyor. Bugün switch tarafında bir değişiklik mi yapıldı?",
+      "Panik halindeyiz, {site_b}'de sunucu da internet de yok! Ağ geçidine bile ping gitmiyor. {site_a}'daki arkadaşlar gayet rahat çalışıyor. Neden sadece biz?",
+      "{vlan_name} ağının {site_b}'de oturan kullanıcıları bir anda her şeye erişimi kaybetti; {site_a}'daki aynı ağ üyelerine de gidemiyorlar. Diğer ağlar iki binada da normal.",
+      "Ticket: {site_b} kullanıcıları 'ağ tamamen gitti' diyor. Ağ geçidine, sunuculara, karşı binadaki makinelere ulaşım yok. {site_a} sağlam. Etkilenen ~15 kullanıcı.",
+      "{site_b}'dekiler ne yazıcıya ne paylaşıma ne sunucuya ulaşabiliyor; bina dışına hiçbir şey gitmiyor. {site_a} tarafı tıkır tıkır. Dün gece klima arızası vardı, alakası olur mu?",
+      "{host_ip} makinesi ve tüm {site_b} ekibi ağdan düştü. Kablo değiştirdik, port değiştirdik, olmadı. {site_a} çalışıyor. Sorun bizde değil galiba, ağ tarafında bir şey var.",
+      "Yönetici notu: {site_b} şubesi bütün sabahı bağlantısız geçirdi, hiçbir sisteme giremediler. Merkez ofis ({site_a}) etkilenmedi. Bu iş ne zaman çözülür?",
+      "{vlan_name} kullanan herkes koptu — bunlar ağırlıklı {site_b}'de oturuyor. Ağ geçidi dahil hiçbir yere çıkamıyorlar. Diğer ağlardaki kullanıcılar iki binada da sorunsuz.",
+      "{site_b} tarafında hiçbir bilgisayar ne sunucuya ne karşı binadaki makineye ulaşabiliyor. IP'ler üzerinde duruyor, kablo ışıkları yanıyor. {site_a} normal. Sanki o bina ağdan izole edildi.",
+      "Acil! {site_b} çağrı merkezi çalışamıyor, sistem açılmıyor. Bina dışına hiçbir bağlantıları yokmuş. Diğer kat ({site_a}) sorunsuz. Müşteri hattı düştü, hızlı olun.",
+      "{site_b} kullanıcıları ağa hiç çıkamıyor; ağ geçidine ping bile gitmiyor. {site_a} tarafı gayet iyi. Öğle yemeğinden sonra başladı, sabah sorun yoktu.",
+      "Merhaba, {site_b} ofisimiz komple erişim kaybetti. Sunucu, internet, ortak klasör; hepsi gitti, ağ geçidi bile cevap vermiyor. {site_a} etkilenmedi. Yardımcı olur musunuz?"
+    ]
+  },
+  "wrong_host_gateway": {
+    "symptoms": [
+      "{host_ip} adresli bilgisayar sunuculara çıkamıyor; yan masadaki {host2_ip} sorunsuz. İkisi de aynı ağda, birbirlerine ping atabiliyorlar. Dışarı çıkamayan sadece bu makine.",
+      "Tek kullanıcıda garip bir sorun var: {host_ip}, komşu bilgisayarlara erişiyor ama {server_ip} veya {server2_ip}'ye hiçbir şekilde ulaşamıyor. Diğer herkes normal.",
+      "Çağrı kaydı: {user_name} ({host_ip}) sabahtan beri sunuculara bağlanamıyor. IP'si var, yereldeki paylaşımlar açılıyor ama dışarı giden her şey zaman aşımına düşüyor. Aynı odadaki diğerleri sorunsuz.",
+      "Yeni gelen stajyerin bilgisayarı ({host_ip}) internete ve sunuculara çıkamıyor. Yandaki makineleri görebiliyor ama o kadar. Formatladık, sürücü güncelledik, olmadı.",
+      "{host_ip}'de tuhaf bir durum var: yerel ağdaki her şeye ulaşıyor, dosya paylaşımı çalışıyor; ama {server_ip}'ye traceroute atınca ilk adımda takılıyor, sanki ağ geçidini bulamıyor.",
+      "Bir kullanıcı sürekli 'internet yok' diye arıyor ama sorun sadece onda. {host_ip} makinesi. Yan masa ({host2_ip}) aynı prizden, aynı ağdan sorunsuz çalışıyor. Kabloyu da değiştirdik.",
+      "Ticket #5012: Tek makine etkileniyor. {host_ip} -> komşulara ping tamam, sunuculara ping başarısız, internete çıkış başarısız. Aynı segmentteki diğer 10 makine tamamen normal.",
+      "Müdürün bilgisayarı sunuculara bağlanamıyor, çok sinirli! Ama garip: yan odadaki asistanın makinesi ({host2_ip}) aynı ağdan gayet çalışıyor. Dışarı çıkamayan sadece onunki ({host_ip}).",
+      "{host_ip}: yereldeki yazıcıya basıyor, komşu bilgisayarların paylaşımını açıyor, ama {server_ip}'deki {app_name}'e giremiyor. Sorun tek bu makinede. IP ayarları bize normal göründü.",
+      "Muhasebeden bir kişi ({host_ip}) sunucuya erişemiyor; aynı odadaki diğer üç kişi sorunsuz. Aynı oda, aynı ağ, aynı kablo tipi. Onunkinde sadece dışarı çıkış yok.",
+      "Bir kullanıcı 'ben yalnızca kendi katımdaki bilgisayarlara ulaşabiliyorum, başka hiçbir yere gidemiyorum' diyor. Makinesi {host_ip}. Diğer herkes normal çalışıyor.",
+      "Acil değil ama tuhaf: {host_ip} makinesi sanki yerel ağla sınırlı kalmış. Aynı ağdaki arkadaşlara erişiyor; sunucu ve internet yok. Tek kişi etkileniyor.",
+      "Yeni kurulan bir bilgisayar ({host_ip}) ağa bağlandı, IP aldı, yandaki makineleri görüyor ama sunuculara ve internete hiç çıkamıyor. Kurulum sırasında bir ayar mı yanlış girildi acaba?",
+      "{user_name}'in makinesi sabahtan beri 'sınırlı bağlantı' gibi davranıyor. Yerelde her şey var, dışarısı sıfır. IP'si {host_ip}. Ekipte başka kimse etkilenmedi.",
+      "Merhaba, bir kullanıcımız ({host_ip}) hiçbir sunucuya erişemiyor ama aynı ofisteki diğer bilgisayarlara ping atabiliyor. Tek etkilenen o. Nereye bakmamızı önerirsiniz?"
+    ]
+  },
+  "acl_blocking_traffic": {
+    "symptoms": [
+      "İzleme sistemimiz tüm sunucuları down gösteriyor — hiçbirine ping gitmiyor. Ama kullanıcılar uygulamalara girebildiklerini söylüyor. Ya izleme bozuk ya ağda tuhaf bir şey var.",
+      "{subnet} ağından sunuculara ping atılamıyor; ne {server_ip} ne {server2_ip}. İlginç olan şu: uygulama trafiği çalışıyor gibi, sadece ping ve teşhis trafiği ölü. Kafamız karıştı.",
+      "Ağ ekibi dün gece bakım yapmış. Bu sabahtan beri monitoring ping alarmları çalıyor ama tek bir kullanıcı şikayeti yok, uygulamalar açılıyormuş. Neler olduğunu anlamamız lazım.",
+      "Çağrı kaydı: İzleme, {server_ip} ve {server2_ip} için 'host unreachable' veriyor. Kullanıcı doğrulaması yapıldı: web uygulaması ve dosya paylaşımı normal çalışıyor. Yalnızca ping cevapsız.",
+      "Panik yapmayın dediler ama alarm paneli kıpkırmızı, hiçbir sunucu ping'e cevap vermiyor! Kullanıcılara sordum, 'bizde sorun yok, çalışıyoruz' diyorlar. Sunucu ölü mü değil mi, anlamadım.",
+      "{subnet} tarafından yaptığımız ping testleri hep zaman aşımına düşüyor ama aynı sunucudaki uygulamaya tarayıcıdan girebiliyoruz. Bu nasıl oluyor? Sunucu hem var hem yok gibi.",
+      "Ticket: Dün geceki güvenlik bakımından sonra izleme sistemi sunucuları düşük gösteriyor. Uygulama ekibi 'sistem çalışıyor, kullanıcı girişleri normal' diyor. Ping neden gitmiyor, bilen var mı?",
+      "Yönetici: Panelime bakıyorum her şey kırmızı, sunucular çökmüş görünüyor; ama satış ekibi sipariş girmeye devam ediyor. Gerçekten bir sorun var mı yok mu, net bir cevap istiyorum.",
+      "{server_ip}'ye ne ping ne traceroute gidiyor, komple sessiz. Ama o sunucudaki {app_name} açılıyor, veri geliyor. Sanki yol üstünde yalnızca belli bir tür trafik reddediliyor. Dün bir güncelleme yapıldı.",
+      "Helpdesk kaydı: Kullanıcı şikayeti YOK. Yalnızca izleme sistemi {subnet} -> sunucu ping'lerini başarısız işaretliyor. Bakım penceresi sonrası başladı. Öncelik düşük ama tuhaf.",
+      "Bütün sabah 'sunucular erişilemez' alarmı aldık, IT'ye koşturduk. Meğer herkes normal çalışıyormuş; gitmeyen sadece bizim test ping'lerimiz. Bu ne iş, alarm mı yanlış?",
+      "{subnet}'ten sunuculara teşhis trafiği (ping, traceroute) ölü ama uzak masaüstü ve web erişimi sorunsuz. Yani asıl iş yürüyor, sadece sağlık kontrollerimiz kör kaldı.",
+      "Dün gece 'sınır güvenliği sıkılaştırması' yapıldı diye bir e-posta geldi. Bugün ping tabanlı izlememiz tüm sunucuları kayıp gösteriyor ama kullanıcılar mutlu, çalışıyorlar. Bir ilgisi var mı?",
+      "Sunucular gerçekten mi down? Ping'e cevap yok ama uygulamalar ayakta. İki farklı bilgisayardan denedim: ping hep başarısız, uygulama hep açılıyor. Kafa karıştırıcı.",
+      "Merhaba, izleme ekranımızda {server_ip} ile {server2_ip} kırmızı, ping alamıyoruz. Fakat bu sunuculardaki servisleri kullanıcılar aktif kullanıyor. Sunucuda değil de yolda bir engelleme mi var acaba?"
+    ]
+  },
+  "ospf_mtu_mismatch": {
+    "symptoms": [
+      "{server2_ip}'deki uygulama sunucusuna kimse erişemiyor; {server_ip}'deki diğer sunucu normal. İki binadan da denedik, sonuç aynı: {server2_ip} ulaşılamıyor.",
+      "Öğleden sonra bir anda {server2_ip}'ye giden bağlantılar koptu. Diğer sunucular etkilenmedi. Kimse değişiklik yapmadığını söylüyor ama bir şey değişmiş olmalı.",
+      "Kritik sunucumuz {server2_ip}'ye erişim yok, izleme de düşürdü. {server_ip} gayet sağlıklı. Fiziksel bir sorun görünmüyor, tüm linkler up, kablolar sağlam.",
+      "Çağrı kaydı: {server2_ip} arkasındaki servisler erişilemez oldu. {server_ip} normal. Arayüzler up/up, ışıklar yanıyor, fiziksel katmanda belirti yok. Başlangıç ~14:20.",
+      "Şöyle bir tuhaflık var: ufak tefek şeyler çalışıyor gibi ama {server2_ip}'deki uygulamaya bağlanınca oturum bir yerde donup kalıyor, büyük dosya çekmek imkansız. {server_ip} sorunsuz.",
+      "{server2_ip} tarafı komple gitti, {server_ip} duruyor. Elektrik kesintisi yok, kablo arızası yok, her yer yeşil görünüyor. Ama o sunucuya gidemiyoruz. Anlamıyoruz.",
+      "Ticket #6690: Kullanıcılar {server2_ip}'ye erişemiyor. {server_ip} tamamen normal. Donanım alarmı yok, arayüzler ayakta. Dün akşamki değişiklik penceresinden sonra fark edildi.",
+      "Yönetici: Bir sunucumuz erişilemez durumda ve bu iş kritik. Teknik ekip 'her şey up görünüyor ama trafik geçmiyor' diyor. Bana sadece ne zaman biteceğini söyleyin.",
+      "İki sunucumuzdan biri ({server2_ip}) tamamen erişilemez, diğeri ({server_ip}) çalışıyor. Cihazlar açık, portlar aktif. Sanki yol yarıda kesiliyor. Dün akşamki değişiklikten sonra mı başladı, emin değiliz.",
+      "{server2_ip}'ye bağlanan {app_name} sürekli 'sunucuya ulaşılamıyor' hatası veriyor. Ama sunucu ekibi makinenin ayakta olduğunu, kendi tarafından her şeyin normal göründüğünü söylüyor. Arada bir kopukluk olmalı.",
+      "Garip: {server2_ip} tarafına arada bir şeyler gidiyor gibi oluyor ama gerçek trafik hiç oturmuyor, bağlantılar kurulamıyor. {server_ip} pırıl pırıl. Fiziksel her şey sağlam görünüyor.",
+      "Öğleden sonra yapılan bir arayüz çalışmasından sonra {server2_ip} arkasındaki her şeye erişim kayboldu. Hiçbir arayüz düşmedi, linkler up kaldı. Ama rotalar kaybolmuş gibi davranıyor.",
+      "Acil: {server2_ip} üzerindeki ERP'ye giremiyoruz, tüm şube etkilendi. {server_ip}'deki posta sunucusu çalışıyor. Cihazlarda kırmızı ışık yok, her şey normal görünüyor ama trafik geçmiyor.",
+      "İki farklı binadan {server2_ip}'yi denedik, ikisinden de yok. {server_ip} her yerden açılıyor. Fiziksel katman tertemiz, arayüzler ayakta. Sanki o sunucuya giden yol sessizce kopmuş.",
+      "Merhaba, {server2_ip}'ye erişimimiz tamamen kesildi ama {server_ip} sorunsuz. Cihazlar up görünüyor, port ışıkları yanıyor, kablo problemi yok gibi. Nereye bakmalıyız, fikir verir misiniz?"
+    ]
+  },
+  "link_down_far_end": {
+    "symptoms": [
+      "{site_c}'ye giden bağlantı düştü galiba — o taraftaki herkes sunuculara ve merkeze erişemiyor. Bizim taraftaki port ışığı yanıyor ama karşıdan ses yok. {site_a} ve {site_b} normal.",
+      "{site_c} şubesi komple erişilemez. İlginç olan, bizim uçtaki link up görünüyor ama karşıdan hiçbir şey gelmiyor. Sanki bağlantının öbür ucu kopmuş.",
+      "Çağrı kaydı: {site_c} lokasyonu ana ağdan koptu. Yerel ekip 'kendi aramızda çalışıyoruz ama merkeze ve sunuculara ulaşamıyoruz' diyor. Başlangıç 09:15.",
+      "Panik! {site_c} bütünüyle bağlantısız, müşteri arıyor. Bizim taraftaki gösterge yeşil ama trafik geçmiyor. Karşı uçta bir sorun var sanki. Diğer şubeler normal.",
+      "{site_c}'deki ekip birbirini görüyor ama merkeze ({server_ip}) çıkamıyorlar. Ara hattın bir ucu ölü görünüyor, bizim ucumuz normal duruyor. Dün akşam fırtına vardı, hat mı etkilendi?",
+      "İki nokta arasındaki bağlantıda tuhaflık var: bir uçta arayüz up, diğer uçta down görünüyormuş. Sonuç: {site_c} tarafı merkeze ulaşamıyor, yerel trafikleri kendi içinde çalışıyor.",
+      "Ticket #7120: {site_c} uplink kesik. Yakın uç up görünüyor, uzak uç yanıt vermiyor. Etki: {site_c} kullanıcıları merkezi sistemlere erişemiyor. Saha ekibi yönlendirilebilir.",
+      "Yönetici: {site_c} şubesi bütün sabah çevrimdışı. Merkezle bağlantıları yok; yerelde çalışabiliyorlarmış ama sunuculara giremiyorlar. Hat mı koptu, ekipman mı arızalandı, öğrenin.",
+      "{site_c}'den merkeze giden yol kapandı. Bizim taraftaki bağlantı sağlıklı gözüküyor, karşıdan cevap yok. Sanki hattın öbür ucu düşmüş. Diğer lokasyonlar sorunsuz çalışıyor.",
+      "Bir şube ({site_c}) tamamen izole oldu. Kendi içlerinde bilgisayarlar birbirini görüyor ama {server_ip}'ye ve diğer binalara sıfır erişim. Bizim uçtaki link yeşil, karşı taraf ölü görünüyor.",
+      "{site_c} ile aramızdaki bağlantı tek taraflı kopmuş gibi. Buradan bakınca port up, oradan hiçbir trafik gelmiyor. O şube merkeze çıkamıyor. Ne zaman düzelir?",
+      "Acil: {site_c} çağrı merkezi hatları düştü çünkü ağ bağlantıları yok. Yakın uç normal görünüyor ama uzak taraf yanıtsız. Kablo ekibini mi yönlendirsek?",
+      "{site_c} lokasyonu merkeze bağlanamıyor. Bizim taraftaki arayüz up ama sayaçlar hiç artmıyor, karşı uç sanki kapalı. Diğer tüm şubeler etkilenmedi. Sabah 08:00'de fark ettik.",
+      "Şubelerden biri ({site_c}) ağdan koptu. Yerelde işler yürüyor ama sunuculara ve diğer ofislere erişim yok. Bağlantının bir ucu up, öbürü down görünüyormuş. Hat arızası olabilir mi?",
+      "Merhaba, {site_c} ile merkez arasındaki bağlantı kopmuş görünüyor. İlginç şekilde bizim taraftaki port aktif ama karşıdan yanıt yok. O şube komple erişilemez durumda. Yardımcı olur musunuz?"
+    ]
+  },
+  "native_vlan_mismatch": {
+    "symptoms": [
+      "{vlan_name} ağındaki bilgisayarlar {site_a} ile {site_b} arasında birbirini göremiyor; ama diğer ağlar iki bina arasında sorunsuz konuşuyor. Binalar arası kopukluk sadece bu tek ağda.",
+      "Tuhaf bir durum: bir kısım kullanıcı sanki yanlış ağa düşmüş gibi, beklemedikleri makinelere erişip bekledikleri makinelere erişemiyor. Yalnızca belli bir segment etkilenmiş, diğerleri normal.",
+      "Çağrı kaydı: {vlan_name} segmentinde binalar arası erişim bozuk; aynı bina içinde sorun yok. Diğer VLAN'lar tamamen normal. Switch loglarında uyumsuzluk uyarıları düşüyor.",
+      "{site_a}'daki {vlan_name} kullanıcıları {site_b}'deki aynı ağdaki arkadaşlarına ulaşamıyor; ama iki taraf da kendi binasında sorunsuz. Kafa karıştırıcı: bina geçişi yalnızca bu ağda bozuk.",
+      "Panik değil ama garip: belirli bir grup kullanıcı, iki bina arasında yalnızca kendi ağlarında sorun yaşıyor. Diğer tüm trafik binalar arasında akıyor. Sanki o ağın binalar arası köprüsü çalışmıyor.",
+      "Ticket: {vlan_name} VLAN'ında {site_a}-{site_b} arası erişim kopuk; diğer VLAN'lar aynı hat üzerinden normal geçiyor. Anahtarlarda native VLAN uyumsuzluğuna benzer log satırları var. İnceleyin.",
+      "Yönetici: Bir departmanın {site_a} ve {site_b} ekipleri birbirine ulaşamıyor, ortak sistemlerini kullanamıyorlar. Başka departmanlarda böyle bir sorun yok. Neden sadece onlar?",
+      "Bazı makineler beklemedikleri bir ağın cihazlarını görüyor, kendi kaynaklarını göremiyor; sanki trafik karışmış. Özellikle binalar arası geçişte oluyor. Diğer ağlarda hiç sorun yok.",
+      "{vlan_name} ağı için {site_a}-{site_b} arası ortak klasör ve yazıcı erişimi gitti. Aynı ağın bina içi erişimi çalışıyor; diğer ağlar binalar arasında da sorunsuz. Dün switch tarafında değişiklik yapıldı.",
+      "İki bina arasında yalnızca bir ağda tuhaf bir kayıp var. Kullanıcılar 'bazen alakasız cihazlara denk geliyorum' diyor. O ağın bina içi kısmı ve tüm diğer ağlar normal. Loglarda uyumsuzluk kayıtları var.",
+      "Öncelik orta: {vlan_name} kullanıcılarının binalar arası çalışması bozuk, bina içinde her şey yolunda. Diğer ağlar iki binada da problemsiz. Ortak proje ekibi çalışamıyor.",
+      "Helpdesk: Kullanıcı 'öbür binadaki ekibe erişemiyorum ama internete ve sunucuya çıkabiliyorum' diyor. Aynı ağdaki birkaç kullanıcı daha aynı durumda. Diğer ağlar etkilenmemiş. Segment: {vlan_name}.",
+      "Şöyle: {vlan_name} ağında {site_b} tarafındaki cihazlar {site_a}'daki aynı ağ cihazlarını göremiyor; diğer trafik iki bina arasında akıyor. Anahtar loglarında eşleşmeme uyarıları var, bir bakın.",
+      "Belirli bir kullanıcı grubunun binalar arası iletişimi koptu, geri kalan her şey normal. Sanki o grubun trafiği hat üzerinde yanlış yere gidiyor. Diğer VLAN'lar tertemiz.",
+      "Merhaba, {vlan_name} ağındaki iki binanın kullanıcıları birbirine erişemez oldu; ama aynı ağ kendi binası içinde ve diğer tüm ağlar iki bina arasında sorunsuz. Anahtarlarda native VLAN uyarıları görüyoruz, ne yapmalıyız?"
+    ]
+  },
+  "access_port_wrong_vlan": {
+    "symptoms": [
+      "Bir kullanıcının bilgisayarı ({host_ip}) sanki bambaşka bir ağa bağlanmış: kendi ekibinin makinelerini ve sunucularını göremiyor. Tek etkilenen o. Kabloyu da değiştirdik, olmadı.",
+      "{user_name}'in makinesi beklediğimizden farklı bir IP aralığından adres alıyor, kendi ağında olması gerekirken başka bir ağa düşmüş gibi. Ne kendi sunucularına ne yazıcısına erişebiliyor. Diğer herkes normal.",
+      "Çağrı kaydı: Tek kullanıcı, priz değişikliği sonrası kendi segmentine erişemiyor; beklenen ağ yerine farklı bir ağda görünüyor. Aynı odadaki diğer makineler sorunsuz.",
+      "Yeni yerine taşınan bir çalışanın bilgisayarı ({host_ip}) ağa bağlanıyor ama kendi ekibinin kaynaklarına hiç ulaşamıyor; sanki yanlış ağa takılmış. Eski masasında sorun yoktu. Tek kişi.",
+      "Panik: Bir kullanıcı 'bilgisayarım komple başka bir yere bağlandı, hiçbir şeyimi bulamıyorum' diyor. Aldığı IP bile beklediğimizden farklı bir bloktan. Yanındaki makine normal çalışıyor.",
+      "{host_ip} makinesi kendi ağındaki komşularına erişemiyor ama nedense hiç alakasız bir segmentteki cihazları görüyor. Sorun tek bu makinede. Priz mi yanlış bağlandı acaba?",
+      "Ticket #8033: Kullanıcı taşınma sonrası bağlantı sorunu bildirdi. Makine IP alıyor fakat yanlış subnet'ten; kendi ağındaki hiçbir kaynağa erişemiyor. Etki: 1 kullanıcı.",
+      "Yönetici: Yeni işe başlayan personelin bilgisayarı çalışmıyor, herkes sinirli. IT 'ağa bağlanıyor ama yanlış ağda' diyor. Yan masadaki bilgisayar gayet iyi. Bir an önce çözün.",
+      "Bir bilgisayar ({host_ip}) kendi departmanının paylaşımlarını ve sunucularını göremiyor ama başka bir departmanın bazı cihazlarını görüyor. Sadece o makine böyle. Kablo, priz, port; hepsine baktık dediler.",
+      "Taşınan bir makine yeni prizde beklenmedik bir IP aldı ve kendi ağına dönemiyor. Fiziksel olarak bağlı ama sanki mantıksal olarak yanlış yerde. Tek kullanıcı etkileniyor, diğerleri normal.",
+      "Helpdesk: {user_name} 'dün her şey çalışıyordu, bugün masamı değiştirdim ve hiçbir şeye giremiyorum' diyor. Makine ağda ama yanlış segmentte görünüyor. Eski masasında sorun yoktu.",
+      "Şöyle bir durum: bir kullanıcının bilgisayarı kendi ekibinin ağını görmüyor, tamamen alakasız cihazlara komşu olmuş; IP'si de o yabancı ağdan. Tek makine, geri kalan herkes iyi.",
+      "Acil değil ama tuhaf: {host_ip} makinesi ağa bağlı, ışıklar yanıyor, IP var; ama beklenen ağda değil. Kendi sunucusuna, yazıcısına, ekip arkadaşlarına erişemiyor. Dün priz değişmişti.",
+      "Bir kullanıcının makinesi yanlış ağa düşmüş görünüyor: ne kendi ağındaki cihazları görüyor ne doğru aralıktan IP alıyor. Yandaki masalar normal. Dün bir kablo düzenlemesi yapıldı.",
+      "Merhaba, bir çalışanımızın bilgisayarı ({host_ip}) taşınmadan sonra kendi ağına erişemez oldu, bambaşka bir ağa bağlanmış gibi davranıyor. Aynı odadaki diğer makineler sorunsuz. Portu mu kontrol etmeliyiz?"
+    ]
+  },
+  "svi_down": {
+    "symptoms": [
+      "{vlan_name} ağındaki tüm kullanıcılar sunuculara ve internete çıkamıyor ama kendi aralarında dosya paylaşabiliyor, birbirlerine ping atabiliyorlar. Sanki bu ağın dışarı çıkış kapısı kapanmış. Diğer ağlar normal.",
+      "Bir segmentin tamamı ({subnet}) dışarı erişimi kaybetti. İçeride birbirlerini görüyorlar ama {gateway_ip}'ye ping atınca cevap yok. Diğer VLAN'lar sorunsuz. Öğleden sonra başladı.",
+      "Çağrı kaydı: {vlan_name} kullanıcıları (~25 kişi) sunuculara erişemiyor. Aynı ağ içi iletişim çalışıyor, ağ geçidi yanıt vermiyor. Diğer segmentler etkilenmemiş.",
+      "Panik! Bütün {vlan_name} ekibi internetsiz ve sunucusuz kaldı ama tuhaf şekilde birbirlerine hâlâ dosya gönderebiliyorlar. Sadece dışarı çıkış yok. Diğer katlar çalışıyor.",
+      "{vlan_name} segmentinde ilginç bir durum: herkes kendi arasında sorunsuz ama hiçbiri ağ geçidinin ötesine geçemiyor. Sunucu, internet, diğer binalar; hepsi kapalı. Aynı ağdaki komşuya ping tamam.",
+      "Yönetici: Bir departman komple sunucu erişimini kaybetti, iş durdu. IT 'kendi aralarında çalışıyorlar ama ağ geçidi ölü' diyor. Diğer departmanlar normal. Acil çözüm istiyorum.",
+      "Ticket #9101: {vlan_name} VLAN'ının varsayılan ağ geçidi ({gateway_ip}) yanıt vermiyor. Aynı VLAN içi erişim sağlam; tüm subnet dışarıya çıkamıyor. Diğer VLAN'lar normal.",
+      "{subnet} ağındaki herkes 'internet gitti' diyor ama aslında birbirlerine erişebiliyorlar, sadece dışarı çıkamıyorlar. {gateway_ip} cevapsız. Diğer ağlarda sorun yok. Ne oldu buna?",
+      "Bir ağın tamamı sunuculara ve dış dünyaya kapandı. İçeride her şey normal, aynı segmentteki cihazlar konuşuyor. Sanki o ağın çıkış noktası düştü. Sabah 10 civarı başlamış.",
+      "Helpdesk: Toplu şikayet — {vlan_name} kullanıcıları sunuculara ve internete erişemiyor fakat yerel paylaşımlar ve yazıcı çalışıyor. Ağ geçidi adresine ping başarısız. Etkilenen tek segment bu.",
+      "{vlan_name}'deki bilgisayarlar birbirini görüyor, ortak klasörler açık; ama {server_ip}'ye ve internete kimse gidemiyor. Sanki bu ağın yönlendirici tarafı ölmüş. Diğer ağlar tıkır tıkır.",
+      "Acil: Çağrı merkezi ({vlan_name} ağı) müşteri sistemine bağlanamıyor, hepsi aynı anda koptu. Ama kendi aralarındaki dahili sohbet çalışıyor. {gateway_ip} cevap vermiyor. Hızlı olun lütfen.",
+      "Şöyle bir tablo var: bütün {subnet} segmenti dışarıya kapalı, ağ geçidine erişemiyorlar; ama intranet, yerel paylaşım, aynı ağdaki her şey çalışıyor. Diğer segmentler normal. Bir değişiklik mi oldu?",
+      "Bir VLAN komple 'çıkışsız' kaldı. Kullanıcılar kendi aralarında çalışıyor ama sunucu, internet, diğer ağlar; hepsi erişilemez. Ağ geçidine ping ölü. Diğer VLAN'lar etkilenmedi.",
+      "Merhaba, {vlan_name} ağındaki tüm kullanıcılar aynı anda sunucu ve internet erişimini kaybetti ama ağ içinde birbirlerine hâlâ ulaşabiliyorlar. Ağ geçidi ({gateway_ip}) yanıt vermiyor gibi. Diğer ağlar sorunsuz. Nereye bakalım?"
+    ]
+  },
+  "duplicate_ip": {
+    "symptoms": [
+      "İki bilgisayarda 'IP çakışması' uyarısı çıkıyor, ikisi de aralıklı olarak ağdan düşüp geri geliyor. Bir bakıyorsun çalışıyor, bir bakıyorsun kopuk. Diğer makineler normal.",
+      "{host_ip} adresi hem bir kullanıcıda hem başka bir cihazda görünüyor gibi. Sürekli 'bu IP ağdaki başka bir sistem tarafından kullanılıyor' uyarısı alıyoruz. Bağlantı bir var bir yok.",
+      "Çağrı kaydı: Kullanıcıda IP çakışması bildirimi. İki cihaz aynı adresi kullanıyor olabilir. Etkilenenlerde kesik kesik erişim, ping'ler ara ara zaman aşımı. Dün ağa yeni bir cihaz eklenmişti.",
+      "Panik: Bilgisayarım deli gibi davranıyor, bir dakika internet var bir dakika yok! Ekranın köşesinde IP ile ilgili bir hata çıkıp kayboluyor. Yan masada da benzer şikayet var.",
+      "İki kullanıcı da 'bağlantı kopuyor sonra geliyor' diyor. Ağdan bir arkadaş 'aynı adres iki yerde görünüyor' dedi. Yeni kurulan bir yazıcı ya da cihaz olabilir mi?",
+      "Ticket #1204: Aralıklı bağlantı kaybı, iki uç nokta. {host_ip} için ağ tarafında adres kaydı sürekli değişiyor gibi. Kullanıcılar 'bazen çalışıyor bazen çalışmıyor' diyor. Çakışma şüphesi.",
+      "Yönetici: İki çalışan sürekli bağlantı sorunu yaşıyor, işleri kesintiye uğruyor. Kâh bağlanıyorlar kâh kopuyorlar, bir düzen yok. Bunu kalıcı olarak çözün.",
+      "Sabah yeni bir cihaz kurduk; sonrasında {host_ip} kullanan arkadaşın bağlantısı istikrarını kaybetti, ikisi de ara ara ağdan düşüyor. Tesadüf mü, ilgisi var mı bilmiyoruz.",
+      "İki farklı bilgisayar aynı anda 'IP adresi çakışması tespit edildi' uyarısı veriyor. İkisinde de ağ bir açılıyor bir kapanıyor. Diğer tüm kullanıcılar normal çalışıyor.",
+      "Helpdesk: Kullanıcı 'ekranıma sürekli IP çatışması uyarısı geliyor, o an internet kesiliyor, sonra düzeliyor' diyor. Ping testinde cevaplar düzensiz. Muhtemelen başka bir cihazla aynı adres.",
+      "Şöyle tuhaf: bir kullanıcı bağlanıyor, biraz sonra kopuyor, sonra tekrar bağlanıyor. Aynı sıralarda başka bir cihazda da benzer kesintiler oluyormuş. İkisi aynı IP'yi paylaşıyor olabilir mi?",
+      "Acil değil ama can sıkıcı: {host_ip} adresinde bağlantı stabil değil. Ping bazen gidiyor bazen gitmiyor; adresin sahibi değişip duruyor gibi. Yakınlarda yeni bir cihaz kuruldu.",
+      "Belirli iki makine arasında sanki bir çekişme var: biri çalışırken diğeri kopuyor, sonra tersi oluyor. İkisinde de IP ile ilgili uyarılar çıkıyor. Diğer kullanıcılar etkilenmiyor.",
+      "İki cihazda eş zamanlı, aralıklı erişim sorunu var. Kullanıcılar 'sayfa açılıyor, sonra donuyor, sonra yine açılıyor' diyor. Ağ ekibi aynı adresin iki farklı donanımdan göründüğünü söyledi.",
+      "Merhaba, ağımızda bir IP çakışması olabilir: iki kullanıcı da düzensiz aralıklarla bağlantı kaybediyor ve ekranlarında IP çatışması uyarısı görüyorlar. Yeni bir cihaz eklendikten sonra başladı. Nasıl teşhis ederiz?"
+    ]
+  },
+  "wrong_subnet_mask": {
+    "symptoms": [
+      "Bir kullanıcının bilgisayarı ({host_ip}) bazı makinelere erişiyor, bazılarına hiç erişemiyor. Aynı ofiste! Kimine ping gidiyor kimine gitmiyor, sunuculara da çıkamıyor. Sorun tek bu makinede.",
+      "{host_ip} garip davranıyor: yakınındaki birkaç bilgisayara ulaşıyor ama biraz 'uzaktaki' adreslere ve sunuculara gidemiyor. Sanki ağın sadece bir kısmını görüyor. Diğerleri normal.",
+      "Çağrı kaydı: Tek makinede kısmi erişim. Aynı ağdaki bazı hedeflere ulaşıyor; bazılarına ve ağ geçidine ulaşamıyor. IP ayarlarında tutarsızlık olabilir. Diğer kullanıcılar sorunsuz.",
+      "Panik: Bilgisayarım çok tuhaf, bazı sistemler açılıyor, bazıları hiç açılmıyor! Üstelik hep aynıları açılmıyor, rastgele değil. Yandaki arkadaşta böyle bir sorun yok.",
+      "Yeni kurulan makine ({host_ip}) ağın bir bölümünü görüyor, diğer bölümünü göremiyor. Sunuculara erişemiyor ama en yakın birkaç komşuya erişebiliyor. Kurulumda IP elle mi girildi acaba?",
+      "Ticket #1450: {host_ip} kullanıcısı 'bazı yerlere gidebiliyorum, bazılarına gidemiyorum' diyor. Aynı ağın bir kısmına ping tamam; diğer kısmına ve ağ geçidine başarısız. Adres ayarı kontrolü önerildi.",
+      "Yönetici: Bir çalışan sürekli 'yarım yamalak çalışıyor' diyor; bazı sistemlere giriyor, bazılarına giremiyor. Tek makine. Sinir bozucu bir durum, kalıcı çözüm bekliyorum.",
+      "{host_ip} makinesinde şöyle bir örüntü var: aynı ofisteki bir grup cihaza erişiyor, başka bir gruba ve tüm sunuculara erişemiyor. Erişebildiği ve erişemediği hep aynı adresler. Elle IP girilmişti.",
+      "Bir kullanıcı sunuculara çıkamıyor ama nedense yandaki iki üç bilgisayara erişebiliyor. Ağ geçidine ping gitmiyor. Diğer herkes normal. Kablo değil, tek makinenin ayarı gibi duruyor.",
+      "Helpdesk: Kullanıcı kısmi bağlantıdan şikayetçi. Yerel ağda seçici erişim: bazı IP'lere ulaşıyor, bazılarına hiç. Sunuculara ve internete çıkış yok. Statik IP tanımlı bir makine.",
+      "Şöyle: {host_ip} bilgisayarı ağın bir kısmıyla konuşabiliyor, gerisiyle konuşamıyor. Erişemediği adresler hep aynı aralıkta. Ağ geçidine ve sunuculara ulaşamıyor. Tek kullanıcı, diğerleri iyi.",
+      "Acil değil: Bir makine ({host_ip}) ağın yarısını görüyor gibi. En yakın komşular tamam, ötesi yok; sunucu erişimi yok. Ağ ayarlarında bir uyumsuzluk olabilir mi diye düşündük.",
+      "Bir kullanıcının bilgisayarı bazı dahili sistemlere giriyor, bazılarına 'ulaşılamıyor' diyor. Çalışmayanlar hep aynı sistemler. Aynı ofisteki başka makinelerde bu yok. Statik ayarlı bir cihaz.",
+      "{host_ip}: yakın adreslere erişiyor, ağ geçidine ve uzak adreslere erişemiyor; dolayısıyla dışarı hiç çıkamıyor. Kısmi bir tablo. Kurulum sırasında IP ve maske elle tanımlanmıştı.",
+      "Merhaba, bir kullanıcımızın makinesi ({host_ip}) ağdaki bazı cihazlara ulaşabiliyor ama ağ geçidi ve sunucular dahil bir kısmına hiç ulaşamıyor. Erişilemeyenler hep aynı hedefler. Tek etkilenen o. IP ayarlarına mı bakmalıyız?"
+    ]
+  },
+  "ospf_area_mismatch": {
+    "symptoms": [
+      "{site_c} arkasındaki sistemlere ve {server2_ip}'ye erişim yok. Cihazlar açık, tüm portlar up görünüyor, kablo sorunu yok. Ama o taraftaki rotalar sanki kaybolmuş. {server_ip} normal.",
+      "Dün gece bir yapılandırma değişikliği yapılmış; sabah {site_c} tarafı ana ağdan koptu. Fiziksel her şey normal, arayüzler up. Yönlendirme tarafında bir şey oturmadı sanki. Diğer bölgeler çalışıyor.",
+      "Çağrı kaydı: {server2_ip} ve arkasındaki subnet erişilemez. Arayüzler up/up, fiziksel alarm yok. Komşuluk kurulmuyor gibi. {server_ip} tarafı normal. Dünkü değişiklikten sonra başladı.",
+      "Panik: Bir bölgeye komple erişimimiz gitti, o taraftaki tüm sunucular ulaşılamıyor. Kablolar sağlam, ışıklar yeşil ama trafik geçmiyor. Diğer bölgeler sorunsuz. Dün akşam bir bakım vardı.",
+      "{site_c} tarafının rotaları tabloda görünmüyor, dolayısıyla oraya hiç gidemiyoruz. Arayüzler up, hiçbir link düşmemiş. Sadece komşuluk bir türlü tam kurulmuyor. Geçen hafta yeni bir cihaz eklenmişti.",
+      "Ticket #2200: {server2_ip} arkasındaki ağa ulaşılamıyor. Fiziksel katman temiz, arayüzler up/up; yönlendirme komşuluğu tam kurulmuyor. Muhtemelen dünkü konfigürasyon değişikliği. {server_ip} etkilenmemiş.",
+      "Yönetici: Bir lokasyondaki tüm sistemlere erişimimiz kesildi ve bu kritik. Teknik ekip 'donanım sağlam ama rota gelmiyor' diyor. Dün akşamki değişiklikle ilgili olabilir mi? Acilen bakılsın.",
+      "İki gün önce yeni bir anahtar devreye alındı; o günden beri {site_c} tarafına erişemiyoruz. Portlar up, fiziksel sorun yok. Yönlendirme komşuluğu kurulmamış gibi. Diğer taraflar normal.",
+      "{site_c} bölgesi ağdan koptu ama fiziksel hiçbir belirti yok: arayüzler açık, kablolar sağlam. Sanki iki cihaz anlaşamıyor ve rotalar gelmiyor. {server_ip} her yerden açılıyor, {server2_ip} hiçbir yerden.",
+      "Helpdesk: {site_c} kullanıcıları merkezi sistemlere erişemiyor. Ağ notu: 'komşuluk kurulmuyor, rota tablosunda o subnet yok'. Arayüzler up. Dün konfigürasyon çalışması yapılmıştı.",
+      "Şöyle: {server2_ip} ve arkasındaki her şey erişilemez, {server_ip} çalışıyor. Cihazlar up, portlar aktif, fiziksel katman tertemiz. Ama o yöndeki rotalar yok. Dün bir değişiklik girildi, o zamandan beri böyle.",
+      "Acil: {site_c} şubesindeki ekip hiçbir merkezi uygulamaya giremiyor. Hatlar up görünüyor, kablo ya da port arızası yok. Yönlendirme oturmamış gibi. Diğer şubeler sorunsuz. Dün akşam bakım vardı.",
+      "Bir yapılandırma çalışması sonrası iki yönlendirici arasında komşuluk tam kurulamıyor ve {site_c} tarafının rotaları kayıp. Arayüzler up/up. Kullanıcılar o taraftaki sunuculara erişemiyor. Kalan her şey normal.",
+      "{site_c} segmentine erişim tamamen kesildi, o yöne rota görünmüyor. Fiziksel katman sağlıklı, arayüzler ayakta. Yeni eklenen cihazdan sonra başladı sanki. {server_ip} etkilenmedi.",
+      "Merhaba, {server2_ip} ve arkasındaki ağa erişimimiz kesildi ama {server_ip} sorunsuz. Cihazlar up, portlar aktif, kablo problemi yok. Yönlendirme komşuluğu tam kurulamıyor gibi görünüyor. Dünkü değişiklikle ilgili olabilir mi?"
+    ]
+  },
+  "ospf_auth_mismatch": {
+    "symptoms": [
+      "{site_c} arkasındaki sunuculara erişim kayboldu, {server_ip} normal. Arayüzler up/up, fiziksel sorun yok. İki cihaz arasında komşuluk kurulmuyor gibi. Dün gece bir güvenlik ayarı değiştirildi galiba.",
+      "Dün 'yönlendirme güvenliğini sıkılaştırdık' diye bir değişiklik yapılmış; sonrasında {site_c} tarafına erişim gitti. Portlar up, kablo sağlam. O yöndeki rotalar kayboldu. Diğer bölgeler çalışıyor.",
+      "Çağrı kaydı: {server2_ip} arkasındaki ağ erişilemez. Arayüzler up/up. Cihaz loglarında komşuluk kurulumunda doğrulama/reddetme mesajları görülüyor. {server_ip} normal. Dünkü değişiklik sonrası başladı.",
+      "Panik: Bir bölgeye hiç erişemiyoruz, oradaki tüm sunucular gitti. Fiziksel katman yeşil, arayüzler up. Sanki iki cihaz el sıkışamıyor. Dün akşamki güvenlik güncellemesiyle mi bozuldu?",
+      "{site_c} rotaları tablodan düştü, oraya trafik gitmiyor. Arayüzler up, hiçbir link kopmadı; komşuluk kurulamıyor. Loglarda kimlik doğrulama hatasına benzer satırlar görüyoruz.",
+      "Ticket #2450: {site_c} segmentine erişim yok. Fiziksel temiz, up/up. Komşu yönlendiriciyle komşuluk kurulamıyor; loglara doğrulama uyarısı düşüyor. Dünkü konfigürasyon değişikliğinden şüpheleniyoruz.",
+      "Yönetici: Bir lokasyonun tüm sistemlerine erişim kesildi. Ekip 'donanım iyi ama iki cihaz güvenlik yüzünden anlaşamıyor olabilir' diyor. Dün gece bir değişiklik yapıldı. Acilen çözün.",
+      "Güvenlik ekibi dün yönlendirme tarafında bir sıkılaştırma yaptı. Bu sabah {server2_ip} ve arkası erişilemez. Arayüzler up, rotalar gelmiyor. {server_ip} sorunsuz. Bağlantılı olabilir mi?",
+      "{site_c} bölgesi koptu ama fiziksel hiçbir arıza yok. İki cihaz arasında komşuluk kurulamıyor, rotalar boş. Loglarda anahtar/parola uyumsuzluğuna benzer mesajlar var. Kalan her şey normal.",
+      "Helpdesk: {site_c} kullanıcıları merkezi sistemlere ulaşamıyor. Ağ notu: 'komşuluk düşük, doğrulama başarısız logları var'. Arayüzler up/up. Dün konfigürasyon değişikliği vardı. {server_ip} etkilenmemiş.",
+      "Şöyle: {server2_ip} arkası tamamen erişilemez, {server_ip} çalışıyor. Portlar up, kablo tamam. Komşuluk kurulmuyor ve loglar doğrulama sorununa işaret ediyor. Dün bir değişiklik girildi.",
+      "Acil: {site_c} şubesi merkeze bağlanamıyor. Hatlar up, fiziksel arıza yok. İki cihaz güvenlik nedeniyle komşuluk kuramıyor gibi. Dün akşam bakım yapılmıştı. Diğer şubeler normal.",
+      "Bir güvenlik değişikliği sonrası iki yönlendirici komşuluk kuramıyor ve {site_c} tarafının rotaları kayıp. Arayüzler up/up. Kullanıcılar o taraftaki sunuculara erişemiyor. Loglarda doğrulama uyarısı var.",
+      "{site_c} segmentine erişim kesildi, rota tablosunda o subnet yok. Fiziksel katman sağlam, arayüzler ayakta. Dün gece 'yönlendirme kimlik doğrulaması' ile ilgili bir çalışma yapılmıştı. {server_ip} normal.",
+      "Merhaba, {server2_ip} ve arkasındaki ağa erişim kesildi ama {server_ip} sorunsuz. Arayüzler up, kablo problemi yok. İki cihaz arasında komşuluk kurulmuyor ve loglarda doğrulama hataları görüyoruz. Dünkü güvenlik değişikliğiyle ilgili olabilir mi?"
+    ]
+  },
+  "ospf_hello_mismatch": {
+    "symptoms": [
+      "{site_c} tarafındaki sunuculara erişim bir geliyor bir gidiyor. Bazen açılıyor, birkaç dakika sonra kopuyor, sonra tekrar geliyor. Arayüzler hep up. {server_ip} stabil çalışıyor.",
+      "Dün gece zamanlayıcı ayarlarıyla ilgili bir değişiklik yapılmış; sonrasında {site_c} rotaları oturmuyor. Komşuluk kurulup düşüyor, kurulup düşüyor. Fiziksel katman temiz.",
+      "Çağrı kaydı: {server2_ip} arkasındaki ağa erişim düzensiz. Rotalar bir görünüyor bir kayboluyor. Arayüzler up/up. Komşuluk sürekli kurulup sıfırlanıyor. {server_ip} normal.",
+      "Panik: Bir bölge sürekli kopup açılıyor, kullanıcılar çıldırdı! Bir dakika çalışıyor, bir dakika ölü. Arayüzler up, kablo sağlam. Dün akşam bir ayar değiştirildi. Diğer taraflar normal.",
+      "{site_c} rotaları tabloda titriyor: beliriyor, kayboluyor. İki cihaz komşuluğu bir türlü kalıcı kuramıyor. Arayüzler up. Sanki zamanlamaları tutmuyor. Dün bir değişiklik yapıldı.",
+      "Ticket #2610: {site_c} segmentine erişim gidip geliyor. Komşuluk tam oturmuyor; zamanlayıcı uyumsuzluğu şüphesi. Arayüzler up/up, fiziksel temiz. Dünkü konfigürasyondan sonra başladı. {server_ip} etkilenmemiş.",
+      "Yönetici: Bir lokasyonla bağlantı sürekli kesilip bağlanıyor, iş yapılamıyor. Ekip 'iki cihaz komşuluğu tutturamıyor' diyor. Dün gece değişiklik vardı. Acilen stabilize edin.",
+      "Bir ayar değişikliğinden sonra {site_c} tarafına erişim kararsızlaştı. Ping bir gidiyor bir gitmiyor, {app_name} açılıp kopuyor. Arayüzler hiç düşmüyor ama. {server_ip} sorunsuz.",
+      "{site_c} bölgesine erişim aralıklı: birkaç dakika var, sonra yok, sonra yine var. İki yönlendirici komşuluğu kurup kaybediyor. Fiziksel hiçbir arıza yok. Diğer bölgeler stabil.",
+      "Helpdesk: {site_c} kullanıcıları 'bağlantı gelip gidiyor' diyor. Ağ notu: 'komşuluk sürekli düşüp kalkıyor, hello/dead süreleri uyumsuz olabilir'. Arayüzler up/up. Dün ayar değişti. {server_ip} normal.",
+      "Şöyle: {server2_ip} arkası bir açılıyor bir kapanıyor, {server_ip} stabil. Portlar up, kablo tamam. Komşuluk kalıcı kurulamıyor, sürekli sıfırlanıyor gibi. Dün bir değişiklik girildi.",
+      "Acil: {site_c} şubesinin merkez bağlantısı kararsız, birkaç dakikada bir kopuyor. Hatlar up, fiziksel arıza yok. İki cihaz komşuluğu tutturamıyor. Dün akşam bakım yapıldı. Diğer şubeler stabil.",
+      "Bir değişiklik sonrası iki yönlendirici komşuluğu kurup düşürüyor; {site_c} rotaları bu yüzden gelip gidiyor. Arayüzler up/up. Kullanıcılar aralıklı erişim yaşıyor. Zamanlayıcı uyumsuzluğu olabilir denildi.",
+      "{site_c} segmentine erişim titrek: rota tablosunda o subnet beliriyor, kayboluyor. Fiziksel katman sağlam, arayüzler ayakta. Dün zamanlayıcılarla ilgili bir çalışma yapılmıştı. {server_ip} normal.",
+      "Merhaba, {server2_ip} arkasındaki ağa erişimimiz düzensiz, sürekli kopup açılıyor ama {server_ip} stabil. Arayüzler up, kablo sorunu yok. Komşuluk kalıcı kurulamıyor gibi. Dünkü ayar değişikliğiyle ilgili olabilir mi?"
+    ]
+  },
+  "ospf_passive_transit": {
+    "symptoms": [
+      "{site_c} arkasındaki her şeye erişim gitti, {server_ip} normal. Arayüzler up/up, fiziksel arıza yok. İki cihaz arasında komşuluk hiç kurulmuyor; sanki o hat yönlendirmeye katılmıyor. Dün bir değişiklik yapıldı.",
+      "Dün gece bir arayüz ayarı değiştirilmiş; sonrasında {site_c} rotaları kayboldu. Link fiziksel olarak up ama üzerinden komşuluk oluşmuyor. Diğer bölgeler sorunsuz.",
+      "Çağrı kaydı: {server2_ip} arkasındaki subnet erişilemez. Arayüz up/up ama o hat üzerinden komşuluk hiç kurulmamış, rotalar o yönde yok. {server_ip} normal. Dünkü değişiklik sonrası.",
+      "Panik: Bir bölgeye komple erişim yok! Hatlar up, kablolar sağlam ama o taraftan hiç rota gelmiyor. Sanki bağlantı aktif ama yönlendirmeye dahil değil. Dün akşam bir düzenleme yapıldı.",
+      "{site_c} tarafının rotaları hiç görünmüyor; o hat sanki yönlendirme konuşmasına hiç girmiyor. Arayüz up, ışık yanıyor, kablo tamam. Komşuluk kurulmamış. Dün bir konfigürasyon değişikliği vardı.",
+      "Ticket #2820: {site_c} segmentine erişim yok. Ara hat up/up ancak üzerinde komşuluk yok; arayüz yanlışlıkla yönlendirmeye kapatılmış olabilir. Fiziksel temiz. {server_ip} normal.",
+      "Yönetici: Bir lokasyona erişim tamamen kesildi. Ekip 'hat açık ama yönlendirme o hattı kullanmıyor gibi' diyor. Dün gece bir değişiklik yapıldı. Acil bakılsın, iş duruyor.",
+      "Bir arayüz düzenlemesinden sonra {site_c} tarafından hiç rota gelmiyor. Link fiziksel olarak up ama komşuluk kurulmamış. {server_ip} sorunsuz; kopukluk sadece o yönde.",
+      "{site_c} bölgesi ağdan koptu ama link up görünüyor. İki cihaz arasında komşuluk hiç oluşmamış, o hat yönlendirmeye katılmıyor gibi. Diğer bölgeler normal. Dün değişiklik girildi.",
+      "Helpdesk: {site_c} kullanıcıları merkezi sistemlere ulaşamıyor. Ağ notu: 'ara hat up ama komşuluk yok; arayüz pasif kalmış olabilir'. Rotalar o yönde eksik. {server_ip} etkilenmemiş.",
+      "Şöyle: {server2_ip} arkası tamamen erişilemez, {server_ip} çalışıyor. Port up, kablo tamam ama o hat üzerinden hiç komşuluk yok, rotalar gelmiyor. Dün bir değişiklik yapıldı.",
+      "Acil: {site_c} şubesi merkeze bağlanamıyor. Hat up, fiziksel arıza yok. O bağlantı sanki yönlendirmeye dahil değil, rota alışverişi olmuyor. Dün akşam bakım vardı. Diğer şubeler normal.",
+      "Bir değişiklik sonrası iki yönlendirici arasında komşuluk hiç kurulmuyor; {site_c} rotaları bu yüzden yok. Arayüz up/up. Kullanıcılar o taraftaki sunuculara erişemiyor. Hat yönlendirmeye kapalı gibi.",
+      "{site_c} segmentine erişim kesildi, o subnet rota tablosunda hiç yok. Fiziksel katman sağlam, arayüz ayakta ama üzerinden komşuluk kurulmuyor. Dün bir arayüz ayarı değişmişti. {server_ip} normal.",
+      "Merhaba, {server2_ip} arkasındaki ağa erişim kesildi, {server_ip} sorunsuz. Arayüz up, kablo problemi yok ama o hat üzerinden hiç komşuluk kurulmuyor ve rota gelmiyor. Dünkü arayüz değişikliğiyle ilgili olabilir mi?"
+    ]
+  },
+  "static_route_missing": {
+    "symptoms": [
+      "{server2_ip}'ye erişim gitti; istekler gidiyor gibi ama cevap dönmüyor. {server_ip} normal çalışıyor. Cihazlar up, fiziksel sorun yok. Dün bir yönlendirme değişikliği yapılmıştı.",
+      "{site_c} tarafına giden trafik bir yerde kayboluyor. Buradan oraya paket gidiyor ama geri dönüş yok gibi. {server_ip} sorunsuz. Arayüzler up. Dün konfigürasyon değişti.",
+      "Çağrı kaydı: {server2_ip} erişilemez. Traceroute bir noktaya kadar gidip kayboluyor. {server_ip} normal. Yönlendirme tablosunda ilgili kayıt eksik olabilir. Dünkü değişiklik sonrası başladı.",
+      "Panik: Bir sunucuya ({server2_ip}) hiç ulaşamıyoruz, komple erişilemez! {server_ip} açık. Cihazlarda kırmızı ışık yok. Dün akşam yönlendirmede bir düzenleme yapıldı. Acil bakın.",
+      "{site_c} segmentine giden yol kayboldu. İlginç şekilde bazı bağlantılar tek yönlü gibi davranıyor: istek gidiyor, yanıt gelmiyor. Fiziksel katman temiz. Dün bir rota değişikliği vardı.",
+      "Ticket #3010: {server2_ip} arkasındaki ağ erişilemez. Yönlendirme tablosunda o hedefe kayıt yok gibi. Arayüzler up/up. Dünkü yönlendirme çalışmasından şüpheleniyoruz. {server_ip} normal.",
+      "Yönetici: Kritik sunucumuza ({server2_ip}) erişim tamamen kesildi. Ekip 'bir yönlendirme kaydı eksik olabilir' diyor. Dün gece değişiklik yapıldı. Bir an önce çözülsün.",
+      "Dün gece yönlendirme temizliği yapıldı; sonrasında {server2_ip}'ye erişim gitti. {server_ip} çalışıyor, cihazlar up. Sanki oraya giden yol tarifi silindi. Diğer hedefler normal.",
+      "{server2_ip}'ye paket gönderiyoruz ama sanki geri dönüş yolu yok, bağlantı hep yarım kalıyor. {server_ip} sorunsuz. Fiziksel her şey normal. Dünkü değişiklikle ilgili olabilir.",
+      "Helpdesk: Kullanıcılar {site_c} tarafındaki sisteme erişemiyor. Ağ notu: 'hedef ağa rota bulunamıyor'. Arayüzler up. Dün yönlendirme değişikliği yapılmıştı. {server_ip} etkilenmemiş.",
+      "Şöyle: {server2_ip} arkasına giden trafik bir yerde düşüyor, geri gelmiyor. {server_ip} çalışıyor. Portlar up, kablo tamam. Yönlendiricide o hedefe kayıt eksik gibi. Dün değişiklik girildi.",
+      "Acil: {site_c} şubesindeki sisteme merkezden erişilemiyor. Hatlar up, fiziksel arıza yok. Oraya giden yol tarifi kaybolmuş gibi, trafik hedefe ulaşmıyor. Dün akşam bakım vardı.",
+      "Bir yönlendirme değişikliğinden sonra {server2_ip}'ye erişim kesildi; sanki oraya giden kayıt silinmiş. Arayüzler up/up. Kullanıcılar o sunucuya ulaşamıyor. {server_ip} normal.",
+      "{site_c} segmentine trafik gidiyor ama dönmüyor, tek yönlü bir kopukluk var sanki. Fiziksel katman sağlam, arayüzler ayakta. Dün bir rota düzenlemesi yapıldı. Diğer hedefler sorunsuz.",
+      "Merhaba, {server2_ip} ve arkasındaki ağa erişimimiz kesildi ama {server_ip} sorunsuz. Cihazlar up, kablo problemi yok. Oraya giden yol tarifi eksik gibi, paketler hedefe varmıyor. Dünkü yönlendirme değişikliğiyle ilgili olabilir mi?"
+    ]
+  },
+  "no_fault": {
+    "symptoms": [
+      "Sistem bugün çok yavaş geliyor, dün daha hızlıydı sanki. Bir şey mi değişti? Aslında her şey açılıyor ama içime sinmedi. Bir kontrol eder misiniz?",
+      "Ağ bugün bir tuhaf, sunucudaki uygulamalar biraz geç açılıyor gibi. Ölçtüm, ping normal aslında; ama yine de eskisi kadar akıcı değil sanki. Emin değilim.",
+      "Çağrı kaydı: Kullanıcı 'ağ yavaşladı' diyor. Yapılan testlerde ping normal, sunucu erişimi normal, hız beklenen aralıkta. Somut bir arıza bulgusu yok; kullanıcı yine de emin değil.",
+      "Dün her şey daha hızlı çalışıyordu galiba, bugün biraz ağır. Ama tam olarak neye parmak basacağımı bilemiyorum. Belki bendedir, belki değildir. Bir bakıverin işte.",
+      "Yönetici: Ekip 'sistem eskisi gibi değil' diyor ama neyin bozuk olduğunu kimse söyleyemiyor. Her şey açılıyor, işler yürüyor. Yine de bir el atın, moral meselesi.",
+      "Bilgisayarım sabah açılırken biraz bekledi, sonra düzeldi. Şimdi her şey normal ama acaba ağda bir sıkıntı mı var diye sormak istedim. Şu an sorun yaşamıyorum aslında.",
+      "Helpdesk: '{app_name} bazen takılıyor' şikayeti. Tekrar üretilemiyor. Kullanıcının makinesinde ve ağda ölçülen bir sorun yok. Muhtemelen anlık bir uygulama gecikmesi. Ağ sağlıklı görünüyor.",
+      "Ağ yavaş gibi hissediyorum ama bağlıyım ve her şey açılıyor. Belki bugün sadece bana öyle geliyor, ortak klasör yavaş geldi. Yine de bir sorayım dedim, garanti olsun.",
+      "Dün bir arkadaş 'sizin ağ çok hızlıymış' demişti, bugün bana öyle gelmiyor. Bir yavaşlama mı var acaba? Test ettim, değerler iyi çıktı ama içim rahat etmedi.",
+      "Sürekli 'bağlantı kopacak' gibi hissediyorum ama aslında bugün hiç kopmadı. Belki kuruntudur. Yine de kayıt açayım, bir kontrol edersiniz.",
+      "Sabah ortak klasör biraz geç açıldı sanki, sonra normale döndü. Şu an sorun yok. Ağda genel bir yavaşlık ihtimali var mı diye merak ettim sadece.",
+      "Yeni monitör taktım, ondan sonra ağ yavaşladı gibime geldi. Alakası var mı bilmiyorum, muhtemelen yok; ama bir sorayım dedim. Her şey çalışıyor aslında.",
+      "Çağrı kaydı: Kullanıcı 'geçen haftaya göre sistem farklı' diyor; spesifik bir hata veya erişim sorunu tarif edemiyor. Tüm servisler erişilebilir, performans normal. Somut arıza yok.",
+      "Bugün her şey biraz tuhaf gibi ama ne olduğunu söyleyemem. Belki hava, belki pazartesi sendromu. Sistemler çalışıyor. Yine de not düşeyim, belki bir örüntü vardır.",
+      "Merhaba, ağın eskisi kadar hızlı olmadığını düşünüyorum ama yaptığım testlerde bir anormallik göremedim; sunuculara erişim sorunsuz. Yine de gözden kaçan bir şey var mı diye danışmak istedim."
+    ]
+  },
+  "insufficient_info": {
+    "symptoms": [
+      "Kablosuz ağ sürekli kopuyor; telefonlar ve laptoplar ikide bir düşüyor. Kablolu makinelerde şikayet yok gibi. Bir bakar mısınız?",
+      "{user_name} evden VPN'e bağlanamıyor, 'sunucuya ulaşılamıyor' hatası alıyormuş. Ofise gelince aynı bilgisayar sorunsuz çalışıyor. Bizim ağdan mı?",
+      "Muhasebedeki yazıcıya kimse çıktı gönderemiyor, işler kuyrukta bekliyor. Bilgisayarlar sunuculara normal giriyor. Ağ mı yazıcı mı, çözemedik.",
+      "IP telefonlarda ses kesik kesik geliyor, aramalar arada düşüyor. Veri tarafında kimseden şikayet yok. Santral firması 'ağınıza baktırın' demiş.",
+      "E-postalar gelmiyor; posta programı açılıyor ama 'bağlantı zaman aşımı' veriyor. İç sistemler normal çalışıyor. Acaba ağda bir engel mi var?",
+      "Video toplantılarda görüntü donuyor, ses gidip geliyor. Başka her şey normal görünüyor. Yarın genel müdür sunumu var, bugün çözülmeli.",
+      "Turnikeler kart okumuyor; güvenlik 'sisteme bağlanamıyoruz' diyor. Kartlı geçiş ayrı bir firmadan. Ağ tarafında sorun olabilir mi?",
+      "Güvenlik kameralarının bir kısmı kayıt sunucusuna görüntü göndermiyor. Kameralar ayrı bir sistem sanırım ama önce ağı kontrol edin istedik.",
+      "Ziyaretçi karşılama tableti randevu sistemine bağlanamıyor; tablet kablosuz çalışıyor. Resepsiyon kuyruğu büyüdü, hızlıca bakabilir misiniz?",
+      "{app_name} sürekli 'oturum süresi doldu' hatası veriyor, kullanıcılar defalarca giriş yapmak zorunda kalıyor. Ağdan mı uygulamadan mı bilmiyoruz.",
+      "Depodaki el terminalleri merkeze senkron olmuyor; terminaller kablosuz çalışıyor. Depo ekibi bekliyor, aciliyet var.",
+      "Çağrı kaydı: uzak çalışan {user_name} VPN üzerinden dosya sunucusuna erişemiyor. Ofis içi kullanıcılarda şikayet yok. Başlangıç 10:20.",
+      "Bina otomasyon paneli (klima ve aydınlatma) merkeze veri göndermiyor; o sistem ayrı bir firmadan ve kendi kutusu var. Bizim ağla ilgisi var mı, bakar mısınız?",
+      "Antivirüs konsolu istemcilere güncelleme dağıtamıyor uyarısı veriyor. Sunucu ekibi 'ağdan olabilir' deyip topu bize attı.",
+      "Bordro sistemine kimse giremiyor; o sistem dışarıda barındırılıyor galiba. Bizim ağdan mı kaynaklanıyor, bir kontrol eder misiniz?"
+    ]
+  },
+  "multi_fault": {
+    "symptoms": [
+      "İki ayrı sorun var galiba: bir yandan {site_b} komple ağdan düştü, hiçbir yere erişemiyorlar; diğer yandan {site_a}'da tek bir kullanıcı ({host_ip}) sunuculara çıkamıyor ama komşularına erişebiliyor. Bunlar bağlantılı mı ayrı mı bilmiyoruz.",
+      "Çağrı kaydı: Aynı anda iki şikayet. (1) {vlan_name} kullanıcıları sunuculara ve internete çıkamıyor, kendi aralarında çalışıyorlar. (2) Ayrıca {server2_ip}'ye hiç kimse erişemiyor, {server_ip} normal. İki durum aynı sırada başladı.",
+      "Panik: Hem {site_b} tarafı komple erişilemez oldu hem de izleme sistemimiz tüm sunucuları ping'e cevapsız gösteriyor ama kullanıcılar uygulamalara girebiliyor. İki farklı tuhaflık aynı sabah patladı.",
+      "Karışık bir durum: bir kullanıcının bilgisayarı ({host_ip}) yanlış ağa düşmüş gibi, kendi kaynaklarını göremiyor. Ayrıca {server2_ip}'ye tüm ofisten erişim kesilmiş, {server_ip} çalışıyor. İkisi alakalı mı?",
+      "Yönetici: İki yerden birden şikayet var. {site_b} komple çevrimdışı. Bir de {site_a}'da iki bilgisayar sürekli kopup bağlanıyor, IP çakışması uyarısı alıyorlarmış. İkisini de çözün, iş duruyor.",
+      "Aynı anda iki şey oldu sanki: {vlan_name} segmenti dışarı çıkışını kaybetti (ağ geçidine ping yok ama kendi aralarında var); bir de {site_c} arkasındaki sunucular erişilemez, o taraftan rota gelmiyormuş. Kafamız karıştı.",
+      "Helpdesk: Çift bildirim. (A) Tek kullanıcı ({host_ip}) yerel komşularına erişip sunuculara çıkamıyor. (B) Ayrıca izleme, {subnet}'ten sunuculara ping'lerin hepsini başarısız gösteriyor ama uygulama trafiği çalışıyor. İki ayrı olay gibi.",
+      "İki sorun var, muhtemelen bağımsız: {site_b} bütünüyle ağdan koptu; ve {server2_ip}'ye erişim gitti (istek gidiyor, dönüş yok) ama {server_ip} sorunsuz. Aynı gün başladılar, tesadüf mü bilmiyoruz.",
+      "Karmaşık: Bir yandan {vlan_name} kullanıcıları binalar arası birbirini göremiyor (diğer ağlar iki bina arasında çalışıyor), diğer yandan tek bir makine ({host_ip}) hiçbir sunucuya çıkamıyor ama yerelde çalışıyor. İki farklı şikayet.",
+      "Panik: Ofiste kaos var! {site_b} komple erişimsiz; ayrıca birkaç kullanıcının bağlantısı aralıklı kopup bağlanıyor ve ekranlarında IP çakışması uyarısı çıkıyor. Bunlar ayrı sorunlar sanki ama emin değilim.",
+      "Çağrı kaydı: İki bağımsız belirti. (1) {site_c} arkasındaki ağ erişilemez; arayüzler up ama o yöne rota yok deniyor. (2) Ayrıca taşınan bir kullanıcının makinesi ({host_ip}) yanlış segmentte, kendi ağını göremiyor. Aynı vardiyada bildirildi.",
+      "Hem büyük hem küçük bir sorun aynı anda: tüm {vlan_name} segmenti sunuculara çıkamıyor (ama kendi aralarında çalışıyorlar); ayrıca bir kullanıcı bazı sistemlere girip bazılarına giremiyor, kısmi erişim yaşıyor. Bağlantılı mı, değil mi?",
+      "Yönetici: İki ekip birden şikayetçi. Muhasebe ({vlan_name}) komple dışarı çıkışını kaybetti; satış tarafında da bir sunucuya ({server2_ip}) erişim yok, diğerine var. Kritik durum, ikisini de çözün.",
+      "İki ayrı olay gibi görünüyor: {site_b} tarafı ağdan tamamen düştü; bir de ayrıca izleme paneli {server2_ip}'yi kayıp gösteriyor ama {server_ip} sağlıklı ve {site_a} normal çalışıyor. Nereden başlayalım?",
+      "Merhaba, sanırım eş zamanlı iki farklı arıza var: birincisi tek bir kullanıcı ({host_ip}) sunuculara erişemiyor ama komşularına erişiyor; ikincisi {site_c} tarafı komple merkez bağlantısını kaybetti. Bunları ayrı ayrı mı ele almalıyız?"
+    ]
+  }
+}

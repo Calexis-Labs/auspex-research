@@ -1,0 +1,510 @@
+{
+  "_meta": {
+    "aciklama": "Arıza taksonomisi notları: verifier'ın sınıf ayrımı kontrolü ve eğitim müfredatının kolay→zor sıralaması için. 'status: aktif' = mevcut/sprint'te; 'status: faz2_aday' = henüz enjektörü yazılmamış aday sınıf.",
+    "surum": "v1",
+    "layer_degerleri": [
+      "l1",
+      "l1/l2",
+      "l2",
+      "l2/l3",
+      "l3",
+      "l3/control-plane",
+      "policy",
+      "host",
+      "host/policy",
+      "meta"
+    ],
+    "difficulty_kilavuzu": {
+      "easy": "Tek komutla görünür imza (arayüz down, rota yok); müfredatın ilk halkası.",
+      "medium": "İmza net ama doğru komutu/konumu seçmek gerekir; 2-3 adımlı akıl yürütme.",
+      "hard": "İmza dolaylı, zamana yayılı veya birden çok sınıfla örtüşüyor; karşılaştırmalı/tekrarlı gözlem şart."
+    }
+  },
+  "classes": [
+    {
+      "fault_class": "interface_admin_down",
+      "layer": "l1/l2",
+      "status": "aktif",
+      "observable_signature": "Bir routed linkin bir ucu 'administratively down'; show interfaces açıkça 'disabled' der. O link üzerinden taşınan L3 erişim düşer, trunk/L2 trafiği ve diğer linkler çalışır. Karşı uç 'notconnect/down' görünür. (v2: link_down_far_end bu sınıfa birleştirildi — kök cihaz linkin HERHANGİ bir ucu olabilir; teşhiste doğru uç/cihaz seçimi esastır.)",
+      "distinguishing_from": [
+        {
+          "class": "ospf_mtu_mismatch",
+          "ayirt_edici_test": "Arayüz durumu: admin down'da link fiziksel olarak kapalı; MTU uyumsuzluğunda her iki uç up/up olup OSPF EXSTART'ta takılır."
+        }
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "fault_class": "vlan_removed_from_trunk",
+      "layer": "l2",
+      "status": "aktif",
+      "observable_signature": "Trunk'ın allowed VLAN listesinden bir VLAN eksik (show interfaces trunk). O VLAN'ın trunk ötesindeki hostları gateway'e ve VLAN komşularına erişemez; OSPF FULL kalır, diğer VLAN'lar akar.",
+      "distinguishing_from": [
+        {
+          "class": "native_vlan_mismatch",
+          "ayirt_edici_test": "show interfaces trunk: allowed listesi eksikse bu sınıf; liste tamsa ama native VLAN iki uçta farklıysa öbürü. CDP/LLDP native uyarı logları da ipucu."
+        },
+        {
+          "class": "svi_down",
+          "ayirt_edici_test": "Etki alanı: trunk sorunu yalnızca trunk'ın ÖTESİNDEKİ hostları vurur; SVI down o VLAN'ın TÜM hostlarını (gateway'in yanındakiler dahil) vurur."
+        }
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "fault_class": "wrong_host_gateway",
+      "layer": "host",
+      "status": "aktif",
+      "observable_signature": "Tek host: aynı L2'deki komşulara ulaşır, routed hiçbir hedefe ulaşamaz. Ağ cihazlarında hiçbir anormallik yok; host'ta 'ip route' default'un yanlış next-hop gösterdiği görülür.",
+      "distinguishing_from": [
+        {
+          "class": "wrong_subnet_mask",
+          "ayirt_edici_test": "Host'ta ip addr + ip route: gateway yanlışsa maske doğru, default rota saçma IP'ye işaret eder; maske yanlışsa yerel subnet'in bir kısmı da düşer."
+        },
+        {
+          "class": "access_port_wrong_vlan",
+          "ayirt_edici_test": "Komşu erişimi: gateway yanlışken host kendi subnet komşularına ulaşır; yanlış VLAN'da host beklenen komşularının HİÇBİRİNE ulaşamaz."
+        }
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "fault_class": "acl_blocking_traffic",
+      "layer": "policy",
+      "status": "aktif",
+      "observable_signature": "Belirli trafik türü (tipik ICMP) belirli kaynaktan düşer; diğer trafik ve tüm protokoller sağlıklı. show ip access-lists'te deny satırı ve artan sayaç; arayüzde access-group bağlı.",
+      "distinguishing_from": [
+        {
+          "class": "no_fault",
+          "ayirt_edici_test": "show ip access-lists: deny sayacı artıyorsa gerçek engelleme vardır; ACL yoksa/permit-only ise ve tüm testler geçiyorsa arıza yoktur."
+        },
+        {
+          "class": "static_route_missing",
+          "ayirt_edici_test": "Kapsam: ACL'de yalnız belirli protokol/kaynak düşer (uygulama çalışır ping ölür); rota eksikse o hedefe HER trafik düşer."
+        }
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "fault_class": "ospf_mtu_mismatch",
+      "layer": "l3/control-plane",
+      "status": "aktif",
+      "observable_signature": "Arayüzler up/up ama OSPF komşuluğu EXSTART/EXCHANGE'de asılı; show ip ospf neighbor'da durum FULL değil. show interfaces'ta iki uçta farklı MTU. Karşı tarafın rotaları tabloda yok.",
+      "distinguishing_from": [
+        {
+          "class": "ospf_area_mismatch",
+          "ayirt_edici_test": "show ip ospf neighbor: MTU'da komşu EXSTART'ta LİSTELENİR; area uyumsuzluğunda komşu hiç görünmez (hello reddedilir). MTU değerlerini karşılaştır."
+        },
+        {
+          "class": "ospf_auth_mismatch",
+          "ayirt_edici_test": "Loglar: auth'ta açık 'authentication failure' mesajı düşer; MTU'da düşmez, komşu EXSTART'ta takılı kalır."
+        }
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "fault_class": "link_down_far_end",
+      "layer": "l1",
+      "status": "alias — etiketi interface_admin_down (v2 birleştirme)",
+      "observable_signature": "Bir linkin uzak ucu down (karşı cihazda shutdown/kablo yok); yerel uç up görünebilir ama sayaçlar akmaz, LLDP komşusu kaybolur. O link üzerinden erişim düşer.",
+      "distinguishing_from": [
+        {
+          "class": "interface_admin_down",
+          "ayirt_edici_test": "AYIRT EDİLEMEZ — pilot 0/7: araç çıktısında iki sınıf da kök cihazda 'administratively down' olarak görünür. Bu yüzden ayrı etiket kaldırıldı; enjektör far-end bakış açılı semptomlar için yaşar, GT etiketi interface_admin_down'dır. Modelin sınavı doğru KÖK CİHAZI bulmaktır (karşı uçta shutdown)."
+        }
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "fault_class": "native_vlan_mismatch",
+      "layer": "l2",
+      "status": "aktif",
+      "observable_signature": "Trunk'ın iki ucunda farklı native VLAN (show interfaces trunk); CDP/LLDP native mismatch uyarı logları. Etiketlenmemiş trafik yanlış VLAN'a düşer: o VLAN'ların binalar arası L2 erişimi bozulur, diğer VLAN'lar akar.",
+      "distinguishing_from": [
+        {
+          "class": "vlan_removed_from_trunk",
+          "ayirt_edici_test": "show interfaces trunk: allowed listeleri iki uçta tam ve eşitse ama 'Native vlan' sütunu farklıysa bu sınıf."
+        },
+        {
+          "class": "access_port_wrong_vlan",
+          "ayirt_edici_test": "Etki alanı: native mismatch trunk geçişindeki BİRDEN ÇOK hostu etkiler; yanlış access VLAN tek portun arkasındaki tek hostu etkiler."
+        }
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "fault_class": "access_port_wrong_vlan",
+      "layer": "l2",
+      "status": "aktif",
+      "observable_signature": "Tek hostun access portu yanlış VLAN'da (show interfaces status / show vlan). Host beklenen subnet komşularının hiçbirini göremez; yanlış VLAN'ın L2 alanına düşer. Diğer her şey normal.",
+      "distinguishing_from": [
+        {
+          "class": "wrong_host_gateway",
+          "ayirt_edici_test": "Komşu testi: yanlış VLAN'da host kendi subnet komşularına ping ATAMAZ (ARP çözülmez); gateway yanlışken komşulara ping atar."
+        },
+        {
+          "class": "svi_down",
+          "ayirt_edici_test": "Etkilenen sayısı: tek host ise port VLAN'ına bak; VLAN'ın tüm hostları ise SVI/gateway'e bak."
+        }
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "fault_class": "svi_down",
+      "layer": "l3",
+      "status": "aktif",
+      "observable_signature": "Bir VLAN'ın SVI'ı (VlanX arayüzü) down/shutdown; show ip interface brief'te görülür. O VLAN'ın TÜM hostları L2'de birbirine erişir ama gateway'e ping ölü, routed hiçbir yere çıkamazlar. Diğer VLAN'lar normal.",
+      "distinguishing_from": [
+        {
+          "class": "vlan_removed_from_trunk",
+          "ayirt_edici_test": "Gateway yanındaki host testi: SVI down'da gateway ile aynı switch'teki host bile çıkamaz; trunk sorununda yalnız trunk ötesindekiler etkilenir."
+        },
+        {
+          "class": "acl_blocking_traffic",
+          "ayirt_edici_test": "Gateway ping + show ip int brief: SVI down'da Vlan arayüzü down görünür; ACL'de arayüz up olup yalnız belirli trafik düşer."
+        }
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "fault_class": "duplicate_ip",
+      "layer": "l2/l3",
+      "status": "aktif",
+      "observable_signature": "Aynı IP iki cihazda: ARP tablosunda MAC değişip durur (show arp tekrarlı sorguda farklı MAC), host loglarında çakışma uyarısı, erişim aralıklı gidip gelir.",
+      "distinguishing_from": [
+        {
+          "class": "ospf_hello_mismatch",
+          "ayirt_edici_test": "Kararsızlığın katmanı: duplicate IP'de OSPF FULL ve stabil kalır, ARP/MAC oynar; hello'da ARP stabil, OSPF komşuluğu düşüp kalkar."
+        },
+        {
+          "class": "no_fault",
+          "ayirt_edici_test": "ARP'ı iki kez oku: aynı IP için MAC değişiyorsa gerçek çakışma vardır; tek MAC ve stabil erişim varsa şikayet algısaldır."
+        }
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "fault_class": "wrong_subnet_mask",
+      "layer": "host",
+      "status": "aktif",
+      "observable_signature": "Tek host'ta yanlış maske (ip addr ile görülür): subnet'in bir kısmına ulaşır, gateway dahil diğer kısmına ulaşamaz (on-link sanır, ARP boşa gider) veya tersine. Kısmi, deterministik erişim deseni.",
+      "distinguishing_from": [
+        {
+          "class": "wrong_host_gateway",
+          "ayirt_edici_test": "ip addr çıktısı: maske yanlışsa /24 yerine ör. /25-/28 görünür ve gateway'e ARP çözülmez; gateway yanlışsa maske doğru, gateway ARP'ı çözülür ama rota yanlış IP'ye gider."
+        },
+        {
+          "class": "access_port_wrong_vlan",
+          "ayirt_edici_test": "Kısmilik: yanlış maskede host bazı subnet komşularına ulaşır; yanlış VLAN'da hiçbirine ulaşamaz."
+        }
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "fault_class": "ospf_area_mismatch",
+      "layer": "l3/control-plane",
+      "status": "aktif",
+      "observable_signature": "İki uçta farklı OSPF area (show running-config / show ip ospf interface); hello'lar reddedilir, komşu show ip ospf neighbor'da HİÇ görünmez. Arayüzler up/up, karşı tarafın rotaları yok.",
+      "distinguishing_from": [
+        {
+          "class": "ospf_mtu_mismatch",
+          "ayirt_edici_test": "show ip ospf neighbor: komşu hiç yoksa area/hello/auth kulvarı; EXSTART'ta asılıysa MTU. Sonra iki uçta area numaralarını karşılaştır."
+        },
+        {
+          "class": "ospf_passive_transit",
+          "ayirt_edici_test": "show ip ospf interface: area farklıysa arayüz OSPF'te ama yanlış area'da; passive'de arayüz 'Passive' işaretli, hello hiç gönderilmez."
+        }
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "fault_class": "ospf_auth_mismatch",
+      "layer": "l3/control-plane",
+      "status": "aktif",
+      "observable_signature": "Bir uçta OSPF auth açık/anahtar farklı; loglarda 'authentication failure/mismatch' satırları. Komşu görünmez veya INIT'te kalır. Arayüzler up/up.",
+      "distinguishing_from": [
+        {
+          "class": "ospf_area_mismatch",
+          "ayirt_edici_test": "Log farkı: auth'ta açık doğrulama hatası loglanır; area'da sessizce reddedilir. Konfigde 'ip ospf authentication' satırını iki uçta karşılaştır."
+        },
+        {
+          "class": "ospf_hello_mismatch",
+          "ayirt_edici_test": "Kararlılık: auth'ta komşuluk hiç kurulmaz (kalıcı yokluk); hello'da kurulur ve dead-interval sonunda düşer (periyodik flap)."
+        }
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "fault_class": "ospf_hello_mismatch",
+      "layer": "l3/control-plane",
+      "status": "aktif",
+      "observable_signature": "İki uçta farklı hello/dead süreleri (show ip ospf interface); komşuluk kurulur ve dead süresi dolunca düşer, periyodik flap. Rotalar gelip gider, erişim aralıklı.",
+      "distinguishing_from": [
+        {
+          "class": "duplicate_ip",
+          "ayirt_edici_test": "Flap'in imzası: hello'da OSPF neighbor down/up logları periyodik; duplicate'te OSPF sağlam, ARP/MAC oynar."
+        },
+        {
+          "class": "ospf_auth_mismatch",
+          "ayirt_edici_test": "show ip ospf neighbor'ı iki kez oku: hello'da durum zamanla FULL→down→FULL döner; auth'ta hep boş/INIT kalır."
+        }
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "fault_class": "ospf_passive_transit",
+      "layer": "l3/control-plane",
+      "status": "aktif",
+      "observable_signature": "Transit (spine-leaf) arayüz yanlışlıkla passive yapılmış; show ip ospf interface o arayüzü 'Passive' gösterir, hello çıkmaz, komşu hiç oluşmaz. Arayüz up/up, sayaçlar akar.",
+      "distinguishing_from": [
+        {
+          "class": "ospf_area_mismatch",
+          "ayirt_edici_test": "show ip ospf interface: 'Passive' bayrağı varsa bu sınıf; passive değilse ve area farklıysa öbürü. Passive listesine bakmak tek hamlede ayırır."
+        },
+        {
+          "class": "interface_admin_down",
+          "ayirt_edici_test": "Arayüz durumu: passive'de link up/up ve ping karşı uca gider (L3 p2p çalışır); admin down'da link tamamen kapalı."
+        }
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "fault_class": "static_route_missing",
+      "layer": "l3",
+      "status": "aktif",
+      "observable_signature": "Statik dünyada bir prefix'in rotası silinmiş (show ip route'ta yok); trafik o hedefe hiç gitmez veya tek yönlü gider (dönüş rotası yoksa). Arayüzler ve komşu erişimi normal.",
+      "distinguishing_from": [
+        {
+          "class": "acl_blocking_traffic",
+          "ayirt_edici_test": "Kapsam testi: rota eksikse o hedefe TÜM protokoller düşer ve 'show ip route <hedef>' boş döner; ACL'de rota tamdır, belirli trafik düşer."
+        },
+        {
+          "class": "svi_down",
+          "ayirt_edici_test": "Gateway ping: rota eksikken host gateway'ine ulaşır (yerel taraf sağlam), uzak hedefe ulaşamaz; SVI down'da gateway'in kendisi ölüdür."
+        }
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "fault_class": "no_fault",
+      "layer": "meta",
+      "status": "aktif",
+      "observable_signature": "Hiçbir teknik anormallik yok: tüm arayüzler up, komşuluklar FULL, rotalar tam, uçtan uca ping/erişim başarılı. Şikayet algısal ('yavaş geliyor', 'dün farklıydı').",
+      "distinguishing_from": [
+        {
+          "class": "acl_blocking_traffic",
+          "ayirt_edici_test": "Uçtan uca test bataryası: her kaynaktan her hedefe ping/erişim geçiyorsa ve ACL sayaçları deny üretmiyorsa arıza yok demektir."
+        },
+        {
+          "class": "insufficient_info",
+          "ayirt_edici_test": "Şikayetin öznesi ağın kendisiyse ve testler temiz çıkıyorsa no_fault; şikayetin öznesi araç görünürlüğü dışında bir sistemse (wifi/VPN/yazıcı/uygulama) insufficient_info."
+        }
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "fault_class": "insufficient_info",
+      "layer": "meta",
+      "status": "aktif",
+      "observable_signature": "Şikayetin öznesi mevcut araçların görünürlüğü DIŞINDA bir sistemdir (kablosuz ağ, VPN, yazıcı, IP telefon, e-posta/uygulama yazılımı, internet çıkışı, dış barındırılan sistem). Gözlenebilen ağ tarafı tamamen sağlıklıdır; şikayetin kendisi eldeki araçlarla test EDİLEMEZ. Doğru davranış: görünür ağı doğrula, temiz olduğunu belirt, hangi ek bilgi/erişimin gerektiğini söyle.",
+      "distinguishing_from": [
+        {
+          "class": "no_fault",
+          "ayirt_edici_test": "Şikayetin ÖZNESİNE bak: no_fault'ta şikayet ağın kendisi hakkındadır (erişim/ping/yavaşlık) ve testler yapılıp temiz çıkar; insufficient_info'da şikayetin öznesi (wifi/VPN/yazıcı/uygulama) araçlarla hiç gözlemlenemez — test kurgulanamaz."
+        },
+        {
+          "class": "multi_fault",
+          "ayirt_edici_test": "multi_fault'ta belirtiler görünür ağda somut ve test edilebilirdir; insufficient_info'da şikayet konusu görünürlük dışıdır."
+        }
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "fault_class": "multi_fault",
+      "layer": "meta",
+      "status": "aktif",
+      "observable_signature": "İki bağımsız arızanın belirtileri üst üste biner (ör. bir bina kopuk + tek host gateway'i bozuk). Tek kök neden tüm gözlemleri açıklamaz; artık (residual) belirti kalır.",
+      "distinguishing_from": [
+        {
+          "class": "no_fault",
+          "ayirt_edici_test": "Kapsama testi: bulunan ilk kök neden düzeltildiğinde (zihinsel simülasyon) açıklanamayan belirti kalıyorsa ikinci arıza aranmalıdır."
+        },
+        {
+          "class": "vlan_removed_from_trunk",
+          "ayirt_edici_test": "Tek-neden yanılgısı: belirtiler tek L2 kesintisiyle açıklanabiliyor mu? Etkilenen kümeler ayrık ve farklı katmanlardaysa multi_fault'tur."
+        }
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "fault_class": "lacp_mode_mismatch",
+      "layer": "l2",
+      "status": "faz2_aday",
+      "observable_signature": "Port-channel üyeleri iki uçta uyumsuz modda (on/active/passive-passive); PC arayüzü down ya da üyeler 'suspended'. show port-channel summary'de bayraklar bozuk.",
+      "distinguishing_from": [
+        {
+          "class": "vlan_removed_from_trunk",
+          "ayirt_edici_test": "show port-channel summary: PC down/üye suspended ise LACP kulvarı; PC up ve allowed listesi eksikse trunk kulvarı."
+        },
+        {
+          "class": "interface_admin_down",
+          "ayirt_edici_test": "Üye arayüzler fiziksel up olabilir; kapanan mantıksal Port-Channel'dır. show interfaces'ta ethernet'ler up iken PC down görünür."
+        }
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "fault_class": "vrrp_dual_master",
+      "layer": "l3",
+      "status": "faz2_aday",
+      "observable_signature": "VRRP çiftinin ikisi de kendini Master sanır (araya L2 kopukluğu girmiştir); show vrrp iki cihazda da 'Master' der, VIP için ARP iki MAC arasında oynar, gateway erişimi aralıklı bozulur.",
+      "distinguishing_from": [
+        {
+          "class": "duplicate_ip",
+          "ayirt_edici_test": "show vrrp: durum çift Master ise VRRP sınıfı; VRRP yapılandırması yokken aynı IP iki MAC'te görünüyorsa düz duplicate_ip."
+        },
+        {
+          "class": "svi_down",
+          "ayirt_edici_test": "Gateway ping'i aralıklı ise ve show vrrp çift Master gösteriyorsa VRRP; ping tamamen ölü ve SVI down ise svi_down."
+        }
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "fault_class": "stp_unexpected_blocking",
+      "layer": "l2",
+      "status": "faz2_aday",
+      "observable_signature": "Yedekli trunk'lı (l2loop) dünyada STP beklenmeyen portu bloklamış ya da root yanlış cihaza kaymış; show spanning-tree'de blocking port ve düşük öncelikli root görünür; trafik dolambaçlı yoldan akar veya kesilir.",
+      "distinguishing_from": [
+        {
+          "class": "vlan_removed_from_trunk",
+          "ayirt_edici_test": "show spanning-tree: port 'discarding/blocking' ise STP kararıdır (allowed listesi tam); trunk listesinden VLAN eksikse öbür sınıf."
+        },
+        {
+          "class": "native_vlan_mismatch",
+          "ayirt_edici_test": "STP blokta TÜM VLAN'lar o portta durur; native mismatch'te port forwarding'dir ve yalnız etiketlenmemiş/karışan VLAN'lar bozulur."
+        }
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "fault_class": "ospf_network_type_mismatch",
+      "layer": "l3/control-plane",
+      "status": "faz2_aday",
+      "observable_signature": "İki uçta farklı OSPF network type (broadcast vs point-to-point); komşuluk FULL görünebilir ama rotalar gelmez/tutarsız olur ya da komşuluk hiç kurulmaz. show ip ospf interface tipleri farklı gösterir.",
+      "distinguishing_from": [
+        {
+          "class": "ospf_hello_mismatch",
+          "ayirt_edici_test": "Broadcast/p2p farkı hello parametre uyuşmazlığı olarak da yansıyabilir; show ip ospf interface'te 'Network Type' alanını doğrudan karşılaştır."
+        },
+        {
+          "class": "ospf_area_mismatch",
+          "ayirt_edici_test": "Area aynıysa ve komşu FULL ama rotalar eksikse network type şüphesi güçlenir; area farklıysa komşu hiç oluşmaz."
+        }
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "fault_class": "svi_wrong_ip",
+      "layer": "l3",
+      "status": "faz2_aday",
+      "observable_signature": "SVI up ama üzerindeki gateway IP'si yanlış (yanlış oktet/yanlış subnet). Hostlar ARP ile gateway'i bulamaz; show ip interface brief'te Vlan arayüzü up/up fakat adres plandan sapmış.",
+      "distinguishing_from": [
+        {
+          "class": "svi_down",
+          "ayirt_edici_test": "show ip interface brief: arayüz up ama IP beklenen gateway değilse bu sınıf; arayüz down ise svi_down."
+        },
+        {
+          "class": "wrong_host_gateway",
+          "ayirt_edici_test": "Etkilenen sayısı: SVI IP yanlışsa VLAN'daki TÜM hostlar çıkamaz; host gateway'i yanlışsa tek host etkilenir."
+        }
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "fault_class": "host_dns_misconfig",
+      "layer": "host",
+      "status": "faz2_aday",
+      "observable_signature": "Host'ta DNS sunucusu yanlış/ulaşılamaz: IP ile erişim ve ping çalışır, isimle erişim zaman aşımına düşer. 'Uygulama açılmıyor ama ping çalışıyor' şikayeti tipiktir.",
+      "distinguishing_from": [
+        {
+          "class": "wrong_host_gateway",
+          "ayirt_edici_test": "IP-ile-test: DNS bozuksa IP ile hedefe erişim TAMDIR, yalnız isim çözümleme düşer; gateway bozuksa IP ile de çıkılamaz."
+        },
+        {
+          "class": "acl_blocking_traffic",
+          "ayirt_edici_test": "Ağ tarafı testi: DNS'te ağ cihazlarında hiçbir deny/anormallik yoktur; sorun host'un resolv.conf'undadır."
+        }
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "fault_class": "static_route_wrong_nexthop",
+      "layer": "l3",
+      "status": "faz2_aday",
+      "observable_signature": "Rota var ama next-hop yanlış cihaza işaret ediyor: trafik yanlış yöne gider, TTL-expired/loop ya da sessiz kara delik görülür. traceroute beklenmeyen ara atlama gösterir.",
+      "distinguishing_from": [
+        {
+          "class": "static_route_missing",
+          "ayirt_edici_test": "show ip route <hedef>: kayıt hiç yoksa missing; kayıt var ama next-hop plandan farklıysa wrong_nexthop. traceroute'ta loop görülürse kesinleşir."
+        },
+        {
+          "class": "ospf_mtu_mismatch",
+          "ayirt_edici_test": "Statik dünyada OSPF yoktur; traceroute'un saptığı nokta ile rota tablosundaki next-hop'u karşılaştırmak yeterlidir."
+        }
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "fault_class": "link_flapping",
+      "layer": "l1",
+      "status": "faz2_aday",
+      "observable_signature": "Bir arayüz saniyeler/dakikalar ölçeğinde up/down döngüsünde; loglarda ardışık LINEPROTO up/down satırları, sayaçlarda carrier-transitions artışı. Erişim aralıklı, protokol komşulukları sürekli sıfırlanır.",
+      "distinguishing_from": [
+        {
+          "class": "ospf_hello_mismatch",
+          "ayirt_edici_test": "show logging + show interfaces sayaçları: flap'te fiziksel link state değişir (carrier transitions artar); hello'da link hep up kalır, yalnız OSPF düşer."
+        },
+        {
+          "class": "duplicate_ip",
+          "ayirt_edici_test": "Flap tek linkin arkasındaki HERKESİ etkiler; duplicate iki spesifik uç noktayı etkiler ve link state stabildir."
+        }
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "fault_class": "host_mtu_blackhole",
+      "layer": "host",
+      "status": "faz2_aday",
+      "observable_signature": "Host arayüzünde MTU düşürülmüş/uyumsuz: ping ve küçük paketler geçer, büyük transferler (dosya, sayfa yükleme) donar. Klasik 'ping var, uygulama yok' kara deliği.",
+      "distinguishing_from": [
+        {
+          "class": "acl_blocking_traffic",
+          "ayirt_edici_test": "Boyutlu ping testi (ping -s 1400 vs -s 100): MTU'da büyük paket düşer küçük geçer; ACL'de boyuttan bağımsız protokol/kaynak bazlı düşer."
+        },
+        {
+          "class": "ospf_mtu_mismatch",
+          "ayirt_edici_test": "Konum: host MTU'sunda ağ cihazlarında OSPF FULL ve rotalar tamdır; sorun tek host'un ip link çıktısındadır."
+        }
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "fault_class": "dhcp_scope_exhausted",
+      "layer": "host/policy",
+      "status": "faz2_aday",
+      "observable_signature": "Yeni bağlanan hostlar IP alamaz (APIPA/adressiz kalır); mevcut kiralıklar çalışmaya devam eder. 'Yeni gelenler bağlanamıyor, eskiler sorunsuz' deseni tipiktir.",
+      "distinguishing_from": [
+        {
+          "class": "access_port_wrong_vlan",
+          "ayirt_edici_test": "ip addr: DHCP'de host hiç adres alamaz ya da 169.254.x.x alır; yanlış VLAN'da adres alır ama yanlış bloktan."
+        },
+        {
+          "class": "no_fault",
+          "ayirt_edici_test": "Etkilenen küme: yalnız YENİ bağlananlar sorunluysa kiralama havuzuna bak; herkes sorunsuzsa ve şikayet algısalsa no_fault."
+        }
+      ],
+      "difficulty": "medium"
+    }
+  ]
+}

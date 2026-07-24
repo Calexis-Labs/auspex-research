@@ -1,0 +1,64 @@
+! {{ name }} — netagent v2 baseline (uretilmis dosya, elle duzenleme)
+no aaa root
+username admin privilege 15 role network-admin secret admin
+!
+hostname {{ name }}
+!
+ip routing
+!
+{% for vlan in node.vlans %}
+vlan {{ vlan.id }}
+   name {{ vlan.name }}
+!
+{% endfor %}
+{% if features.l2loop and node.role == 'leaf' %}
+spanning-tree mode mstp
+!
+{% endif %}
+{% for intf in node.interfaces %}
+interface {{ intf.name }}
+{% if intf.desc is defined %}
+   description {{ intf.desc }}
+{% endif %}
+{% if intf.channel_group is defined %}
+   channel-group {{ intf.channel_group }} mode active
+{% elif intf.access_vlan is defined %}
+   switchport access vlan {{ intf.access_vlan }}
+   switchport mode access
+{% elif intf.trunk_vlans is defined %}
+   switchport trunk allowed vlan {{ intf.trunk_vlans }}
+   switchport mode trunk
+{% elif intf.ip is defined and (intf.name.startswith('Ethernet') or intf.name.startswith('Port-Channel')) %}
+   no switchport
+   ip address {{ intf.ip }}
+{% elif intf.ip is defined %}
+   ip address {{ intf.ip }}
+{% endif %}
+{% if intf.vrrp is defined %}
+   vrrp {{ intf.vrrp.group }} priority-level {{ intf.vrrp.priority }}
+   vrrp {{ intf.vrrp.group }} ipv4 {{ intf.vrrp.vip }}
+{% endif %}
+!
+{% endfor %}
+{% if l3 == 'ospf' %}
+router ospf 1
+   router-id {{ node.router_id }}
+{% for pi in node.ospf_passive %}
+   passive-interface {{ pi }}
+{% endfor %}
+{% for net in node.ospf_networks %}
+   network {{ net }} area 0.0.0.0
+{% endfor %}
+   max-lsa 12000
+!
+{% endif %}
+{% for route in node.static_routes %}
+ip route {{ route.prefix }} {{ route.nexthop }}
+{% endfor %}
+{% if node.static_routes %}
+!
+{% endif %}
+management ssh
+   idle-timeout 0
+!
+end

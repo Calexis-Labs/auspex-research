@@ -1,0 +1,199 @@
+{
+  "version": "v1",
+  "prefix": "mcp__netagent__",
+  "tools": [
+    {
+      "name": "mcp__netagent__get_config_section",
+      "description": "Return one section of the running config as raw text (e.g. section='router ospf', 'vlan', 'interface ethernet2', 'access-list'). Full config is never available.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "device": {
+            "type": "string",
+            "description": "Device name from the topology, e.g. leaf1"
+          },
+          "section": {
+            "type": "string",
+            "description": "Section filter, e.g. 'router ospf'"
+          }
+        },
+        "required": [
+          "device",
+          "section"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "mcp__netagent__get_interfaces",
+      "description": "Interface status summary for a device (link state, vlan, speed, duplex). Pass 'interface' (e.g. ethernet2) for full detail on one interface.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "device": {
+            "type": "string",
+            "description": "Device name from the topology, e.g. leaf1"
+          },
+          "interface": {
+            "type": "string",
+            "description": "Optional single interface, e.g. ethernet2"
+          }
+        },
+        "required": [
+          "device"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "mcp__netagent__get_ip_interfaces",
+      "description": "L3 interfaces with IP/mask. On switches: SVIs and routed ports. On Linux hosts: addresses AND the routing table incl. default gateway.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "device": {
+            "type": "string",
+            "description": "Device name from the topology, e.g. leaf1"
+          }
+        },
+        "required": [
+          "device"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "mcp__netagent__get_ospf_neighbors",
+      "description": "OSPF neighbor table of a device: neighbor id, state (FULL/EXSTART/...), interface.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "device": {
+            "type": "string",
+            "description": "Device name from the topology, e.g. leaf1"
+          }
+        },
+        "required": [
+          "device"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "mcp__netagent__get_routes",
+      "description": "IP routing table of a device. Optionally filter by destination prefix or address.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "device": {
+            "type": "string",
+            "description": "Device name from the topology, e.g. leaf1"
+          },
+          "prefix": {
+            "type": "string",
+            "description": "Optional, e.g. 10.10.0.0/24 or 3.3.3.3"
+          }
+        },
+        "required": [
+          "device"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "mcp__netagent__get_topology",
+      "description": "Discovered LLDP neighbor map of the whole network — which port connects to which device. Good first call.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "mcp__netagent__get_vlans",
+      "description": "VLAN database and trunk status (allowed/native VLANs per trunk) of a switch.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "device": {
+            "type": "string",
+            "description": "Device name from the topology, e.g. leaf1"
+          }
+        },
+        "required": [
+          "device"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "mcp__netagent__ping_from_device",
+      "description": "Ping an IPv4 address FROM the given device (switch or host). Returns raw ping output. count is capped at 5.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "device": {
+            "type": "string",
+            "description": "Device name from the topology, e.g. leaf1"
+          },
+          "target": {
+            "type": "string",
+            "description": "IPv4 address to ping"
+          },
+          "source": {
+            "type": "string",
+            "description": "Optional source interface (switches only), e.g. vlan10"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "Packet count, default 3"
+          }
+        },
+        "required": [
+          "device",
+          "target"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "mcp__netagent__submit_diagnosis",
+      "description": "Submit your FINAL diagnosis and end the session. Call exactly once, only when confident. fix_commands are proposed to a human — they are never executed automatically.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "device": {
+            "type": "string",
+            "description": "Device where the root cause lives"
+          },
+          "fault_class": {
+            "type": "string",
+            "description": "One of the known fault class names"
+          },
+          "root_cause": {
+            "type": "string",
+            "description": "One-sentence root cause, specific (interface, VLAN id, IP...)"
+          },
+          "fix_commands": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Commands a human would apply to fix it"
+          }
+        },
+        "required": [
+          "device",
+          "fault_class",
+          "root_cause",
+          "fix_commands"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ],
+  "sha256": "3bcfcfa091086dc5aa8df9cd79139388a786643db10e32092143bef397f23b3d"
+}

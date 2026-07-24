@@ -1,0 +1,137 @@
+{
+  "_meta": {
+    "aciklama": "Kırmızı ringa bankası: gerçek arızayla BİRLİKTE (veya no_fault dünyasında tek başına) enjekte edilen, göze çarpan ama trafiği ETKİLEMEYEN düzensizlikler. Ajanın 'ilk gördüğü tuhaflığa atlama' refleksini cezalandırmak için kullanılır.",
+    "surum": "v1",
+    "placeholder_sozlesmesi": {
+      "{device}": "rastgele bir cEOS cihazı (pe.eos_config hedefi)",
+      "{host}": "rastgele bir Linux host konteyneri (pe.host_cmd hedefi)",
+      "{unused_intf}": "hiçbir linke/host'a bağlı olmayan boş Ethernet arayüzü",
+      "{used_intf}": "aktif kullanılan bir arayüz (yalnızca kozmetik değişiklik yapılacaksa)",
+      "{vlan_id}": "topolojide KULLANILMAYAN bir VLAN numarası",
+      "{unused_subnet}": "topolojide hiç kullanılmayan bir subnet (ör. 203.0.113.0/24)"
+    },
+    "not": "inject_hint üretim kodu değil, faz-1 confounder modülleri için komut düzeyi tarif."
+  },
+  "confounders": [
+    {
+      "id": "unused_interface_shutdown",
+      "description_tr": "Boşta duran, hiçbir linke bağlı olmayan bir arayüz kapalı (admin down) duruyor; 'show interfaces' çıktısında dikkat çekiyor.",
+      "inject_hint": "eos_config({device}, 'interface {unused_intf}', 'description eski-baglanti-KULLANMA', 'shutdown')",
+      "why_harmless": "Arayüz hiçbir linke/host'a bağlı değil; üzerinden trafik geçmiyor, kapalı olması hiçbir yolu etkilemez."
+    },
+    {
+      "id": "scary_interface_description",
+      "description_tr": "Aktif bir arayüzde korkutucu açıklama: 'ARIZALI - DEGISTIRILECEK' gibi bir description satırı.",
+      "inject_hint": "eos_config({device}, 'interface {used_intf}', 'description ARIZALI-KART-DEGISTIRILECEK-TICKET-4711')",
+      "why_harmless": "Description tamamen kozmetik bir alandır; arayüzün çalışmasına, trafiğe veya protokollere hiçbir etkisi yoktur. Arayüz up/up ve sayaçlar akıyor."
+    },
+    {
+      "id": "unused_vlan_defined",
+      "description_tr": "Hiçbir portta kullanılmayan, adı şüphe uyandıran ek bir VLAN tanımı (ör. 'QUARANTINE').",
+      "inject_hint": "eos_config({device}, 'vlan {vlan_id}', 'name QUARANTINE')",
+      "why_harmless": "VLAN hiçbir access porta veya trunk allowed listesine eklenmemiş; tanımı var, taşıyıcısı yok. Mevcut VLAN'ların iletimini değiştirmez."
+    },
+    {
+      "id": "permit_only_acl",
+      "description_tr": "Bir arayüze uygulanmış, ama yalnızca 'permit ip any any' içeren isimli bir ACL — 'access-group' satırı görüp durabilir.",
+      "inject_hint": "eos_config({device}, 'ip access-list SEC-AUDIT-TEMP', '10 permit ip any any', 'exit', 'interface {used_intf}', 'ip access-group SEC-AUDIT-TEMP in')",
+      "why_harmless": "ACL her şeye izin veriyor; hiçbir paketi düşürmez. Konfigde ACL görünmesi tek başına engelleme kanıtı değildir — içeriğine bakmak gerekir."
+    },
+    {
+      "id": "blackhole_route_unused_prefix",
+      "description_tr": "Topolojide hiç kullanılmayan bir subnet için Null0'a statik blackhole rotası.",
+      "inject_hint": "eos_config({device}, 'ip route {unused_subnet} Null0')",
+      "why_harmless": "Hedef prefix ağda hiç kullanılmıyor; hiçbir gerçek trafik bu rotaya eşleşmez. Rota tablosunda tuhaf görünür ama etkisizdir."
+    },
+    {
+      "id": "extra_loopback",
+      "description_tr": "Cihazda plandışı ikinci bir loopback (Loopback99) ve alakasız bir IP.",
+      "inject_hint": "eos_config({device}, 'interface Loopback99', 'description test-lab-gecici', 'ip address 198.51.100.1/32')",
+      "why_harmless": "Loopback99 hiçbir yönlendirme sürecine dahil edilmemiş; kimse o adrese trafik göndermiyor. Sadece envanter gürültüsü."
+    },
+    {
+      "id": "host_bogus_dns",
+      "description_tr": "Bir host'un /etc/resolv.conf'unda ulaşılamayan bir DNS sunucusu yazılı.",
+      "inject_hint": "host_cmd({host}, \"sh -c 'echo nameserver 198.51.100.53 > /etc/resolv.conf'\")",
+      "why_harmless": "Lab'daki tüm testler ve semptomlar IP tabanlı; isim çözümleme hiçbir akışta kullanılmıyor. DNS bozuk görünse de erişim sorunlarıyla ilgisi yoktur."
+    },
+    {
+      "id": "host_stale_static_arp",
+      "description_tr": "Host'ta, ağda var olmayan bir IP için elle girilmiş kalıcı (static) ARP kaydı.",
+      "inject_hint": "host_cmd({host}, 'ip neigh replace 203.0.113.99 lladdr 02:42:ac:11:00:99 dev eth1 nud permanent')",
+      "why_harmless": "Kayıt, kimsenin konuşmadığı bir IP'ye ait; gerçek hedeflerin ARP çözümlemesini etkilemez. 'ip neigh' çıktısında tuhaf durur, o kadar."
+    },
+    {
+      "id": "host_unused_secondary_ip",
+      "description_tr": "Host arayüzünde plan dışı ikinci bir IP adresi (alakasız bir bloktan).",
+      "inject_hint": "host_cmd({host}, 'ip addr add 192.0.2.77/24 dev eth1')",
+      "why_harmless": "Birincil IP ve default route aynen duruyor; ikinci adres hiçbir akışta kaynak olarak seçilmiyor. Yalnızca 'ip addr' çıktısını kalabalıklaştırır."
+    },
+    {
+      "id": "host_blackhole_route_unused",
+      "description_tr": "Host'ta kullanılmayan bir prefix'e blackhole rotası.",
+      "inject_hint": "host_cmd({host}, 'ip route add blackhole {unused_subnet}')",
+      "why_harmless": "Prefix ağda kullanılmıyor; default route ve yerel subnet rotası bozulmadı. Rota tablosu tuhaf görünür ama trafik akışı aynıdır."
+    },
+    {
+      "id": "maintenance_motd",
+      "description_tr": "Cihazda 'PLANLI BAKIM DEVAM EDIYOR' içerikli login banner'ı unutulmuş.",
+      "inject_hint": "eos_config({device}, 'banner motd', 'DIKKAT: PLANLI BAKIM 02:00-04:00 - DOKUNMAYIN (NOC)', 'EOF')",
+      "why_harmless": "Banner yalnızca oturum açanlara gösterilen metindir; veri düzlemini ve protokolleri etkilemez. Bakım çoktan bitmiş, metin kalmış."
+    },
+    {
+      "id": "empty_portchannel_defined",
+      "description_tr": "Üyesi olmayan bir Port-Channel tanımı (down görünür).",
+      "inject_hint": "eos_config({device}, 'interface Port-Channel9', 'description gelecek-genisleme')",
+      "why_harmless": "Üyesi olmayan port-channel her zaman down görünür; hiçbir trafik onu kullanmıyor ve kullanması da planlanmamış. 'down' satırı tuzaktır."
+    },
+    {
+      "id": "lldp_disabled_one_port",
+      "description_tr": "Tek bir aktif arayüzde LLDP kapatılmış; komşuluk keşfi o portta boş döner.",
+      "inject_hint": "eos_config({device}, 'interface {used_intf}', 'no lldp transmit', 'no lldp receive')",
+      "why_harmless": "LLDP yalnızca keşif protokolüdür; veri iletimi, STP, OSPF etkilenmez. 'show lldp neighbors' eksik görünür ama bağlantı sapasağlamdır."
+    },
+    {
+      "id": "wrong_clock",
+      "description_tr": "Cihaz saati yanlış (aylar geride); log timestamp'leri eski tarihli görünür.",
+      "inject_hint": "pe._run(['docker','exec',container({device}),'FastCli','-p','15','-c','clock set 00:00:00 1 January 2025'])",
+      "why_harmless": "Saat yalnızca log damgalarını etkiler; protokollerin hiçbiri duvar saatine bağlı değil. 'Loglar eski, cihaz donmuş' izlenimi yanıltıcıdır."
+    },
+    {
+      "id": "noisy_syslog_message",
+      "description_tr": "Log'a düşmüş korkutucu ama önemsiz tek seferlik mesaj (ör. yükseltme uyarısı).",
+      "inject_hint": "host_cmd({host}, \"logger -p user.err 'AGENT[431]: watchdog timeout, restarting collector'\") — veya EOS'ta 'send log level warning message ...'",
+      "why_harmless": "Mesaj geçmişte kalmış tek seferlik bir olaya ait; tekrar etmiyor ve hiçbir arayüz/protokol durumuyla eşleşmiyor. Log gürültüsüdür."
+    },
+    {
+      "id": "vlan_name_mismatch_cosmetic",
+      "description_tr": "Aynı VLAN iki switch'te farklı adlandırılmış (ör. USERS vs KULLANICI); ID'ler aynı.",
+      "inject_hint": "eos_config({device}, 'vlan {vlan_id}', 'name KULLANICI_ESKI')",
+      "why_harmless": "802.1Q etiketi VLAN ID'sidir; ad yalnızca yerel etikettir. Adlar farklı diye trunk üzerinden iletim bozulmaz — klasik yanlış şüphe kaynağıdır."
+    },
+    {
+      "id": "high_mtu_on_host",
+      "description_tr": "Bir host arayüzünde MTU 9000'e çekilmiş (jumbo); diğer her şey 1500.",
+      "inject_hint": "host_cmd({host}, 'ip link set dev eth1 mtu 9000')",
+      "why_harmless": "Host büyük MTU'ya sahip olsa da gönderdiği paketler PMTU/TCP MSS ile 1500'e uyar; küçük paketler ve ping zaten etkilenmez. Değer tuhaf ama akış sağlıklıdır."
+    },
+    {
+      "id": "background_ping_noise",
+      "description_tr": "Bir host'ta arka planda sürekli çalışan ping süreci; trafik sayaçları hep hareketli.",
+      "inject_hint": "host_cmd({host}, 'sh -c \"nohup ping -i 5 {gateway_ip} >/dev/null 2>&1 &\"')",
+      "why_harmless": "5 saniyede bir ICMP paketi bant genişliği açısından ihmal edilebilir; 'sürekli trafik var' gözlemi arıza değildir. Süreç listesinde görünmesi kafa karıştırabilir."
+    },
+    {
+      "id": "ospf_maxlsa_config",
+      "description_tr": "OSPF altında dokunulmamış varsayılandan farklı, zararsız bir sınır ayarı (max-lsa çok yüksek).",
+      "inject_hint": "eos_config({device}, 'router ospf 1', 'max-lsa 50000')",
+      "why_harmless": "Sınır mevcut LSA sayısının çok üzerinde; hiçbir zaman tetiklenmez. Konfig diff'inde 'OSPF'e dokunulmuş' izlenimi verir ama davranış değişmez."
+    },
+    {
+      "id": "unused_static_route_extra",
+      "description_tr": "Kullanılmayan bir prefix için gereksiz ama geçerli bir statik rota (next-hop gerçek komşu).",
+      "inject_hint": "eos_config({device}, 'ip route {unused_subnet} {existing_neighbor_ip}')",
+      "why_harmless": "Prefix'e giden trafik yok; rota hiçbir gerçek akışın yolunu değiştirmez. Rota tablosundaki fazladan satır dikkat dağıtıcıdır, o kadar."
+    }
+  ]
+}
